@@ -1,0 +1,7 @@
+__pycache__/
+.idea/
+
+datasets/RAVDESS/raw_data
+datasets/RAVDESS/wav2vec_data
+
+baselines/wav2vec_neural/wav2vec_clf_ravdess/*
