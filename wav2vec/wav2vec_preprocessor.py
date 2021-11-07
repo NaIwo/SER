@@ -4,6 +4,7 @@ from wav2vec import Wav2VecModel
 import tensorflow as tf
 import numpy as np
 import os
+from pathlib import Path
 
 if __name__ == '__main__':
     dataset = RavdessReader(desired_sampling_rate=16000,
@@ -13,12 +14,12 @@ if __name__ == '__main__':
                             val_size=1.0)  # because val is not shuffled
 
     path_iterator = dataset.val_dataset
-    wav2vec = Wav2VecModel(dataset.number_of_classes)
+    wav2vec = Wav2VecModel(dataset.number_of_classes, agg=None, model='large')
 
     for path, y in path_iterator:
         data, _ = dataset._load_audio_raw(path, y)
         raw_path_string = bytes.decode(path.numpy())
-        raw_path_string = raw_path_string.replace('raw_data', 'wav2vec_data')
+        raw_path_string = raw_path_string.replace('raw_data', 'wav2vec_large_data_cnn')
 
         path_to_save = raw_path_string.replace('.wav', '')
         dir_to_save = os.path.join(*path_to_save.split(os.sep)[:-1])
@@ -26,5 +27,5 @@ if __name__ == '__main__':
         wav2vec_out = wav2vec(tf.expand_dims(data, axis=0))
 
         if not (os.path.exists(dir_to_save)):
-            os.mkdir(dir_to_save)
+            Path(dir_to_save).mkdir(parents=True, exist_ok=True)
         np.save(path_to_save, wav2vec_out.numpy())

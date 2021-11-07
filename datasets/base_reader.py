@@ -26,8 +26,8 @@ class DatasetReaderBase:
     def construct_dataset(self):
         pass
 
-    def _construct_train_test_split(self, dataset_size):
-        full_dataset = self.full_dataset.shuffle(1000)
+    def _construct_train_test_split(self):
+        full_dataset = self.full_dataset.shuffle(1000, reshuffle_each_iteration=False)
         self.train_dataset = full_dataset.take(self.get_number_of_examples('train'))
         self.val_dataset = full_dataset.skip(self.get_number_of_examples('train')).take(
             self.get_number_of_examples('val'))
@@ -63,7 +63,7 @@ class DatasetReaderBase:
         audio_func = None
         if self.data_status == 'raw_data':
             return self._load_audio_raw
-        elif self.data_status == 'wav2vec_data':
+        elif self.data_status.startswith('wav2vec_'):
             return self._load_audio_wav2vec
         return audio_func
 

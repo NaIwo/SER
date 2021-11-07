@@ -25,7 +25,7 @@ class RavdessReader(DatasetReaderBase):
 
         self.full_dataset = tf.data.Dataset.zip((file_paths_dataset, labels_dataset))
 
-        self._construct_train_test_split(dataset_size=len(labels))
+        self._construct_train_test_split()
 
     def _get_labels_from_file_names(self, paths):
         """

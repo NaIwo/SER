@@ -3,8 +3,14 @@ import tensorflow as tf
 
 
 class Wav2VecModel:
-    def __init__(self, num_of_classes):
-        self.wav2vec_name = "facebook/wav2vec2-base"
+    def __init__(self, num_of_classes, agg=None, model='large'):
+
+        if model == 'large':
+            self.wav2vec_name = "facebook/wav2vec2-large-960h"
+        elif model == 'base':
+            self.wav2vec_name = "facebook/wav2vec2-base"
+
+        self.agg = agg
 
         self.config = AutoConfig.from_pretrained(
             self.wav2vec_name,
@@ -21,4 +27,9 @@ class Wav2VecModel:
 
     def __call__(self, inputs):
         wav2vec_out = self.wav2vec(inputs, training=False)
-        return tf.math.reduce_mean(wav2vec_out.last_hidden_state, axis=1)
+        result = wav2vec_out.last_hidden_state
+        if self.agg == 'mean':
+            result = tf.math.reduce_mean(wav2vec_out.last_hidden_state, axis=1)
+        elif self.agg == 'sum':
+            result = tf.math.reduce_sum(wav2vec_out.last_hidden_state, axis=1)
+        return result
