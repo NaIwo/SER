@@ -24,7 +24,6 @@ class RavdessReader(DatasetReaderBase):
         labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
 
         self.full_dataset = tf.data.Dataset.zip((file_paths_dataset, labels_dataset))
-
         self._construct_train_test_split()
 
     def _get_labels_from_file_names(self, paths):
@@ -41,7 +40,7 @@ class RavdessReader(DatasetReaderBase):
         """
         labels = list()
         for path in paths:
-            label = path.split('-')[2]
+            label = path.split('-')[-5]
             labels.append(self._convert_to_proper_label(label))  # speech
 
         return labels

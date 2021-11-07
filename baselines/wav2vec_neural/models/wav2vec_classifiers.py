@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from wav2vec import Wav2VecModel
+from preprocessors.wav2vec import Wav2VecModel
 
 
 class Wav2vecClassifier(tf.keras.Model):
