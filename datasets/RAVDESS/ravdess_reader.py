@@ -15,20 +15,17 @@ class RavdessReader(DatasetReaderBase):
     def _construct_dataset(self):
         paths = self._load_all_data_paths()
         file_paths_dataset = tf.data.Dataset.from_tensor_slices(paths)
-        labels = self._get_labels_from_file_names(paths)
-        self.number_of_classes = len(set(labels))
-        labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
-        self.full_dataset = tf.data.Dataset.zip((file_paths_dataset, labels_dataset))
-        self._construct_train_test_split(dataset_size=len(labels))
-        self.number_of_ds_examples = len(labels)
 
-    def _construct_train_test_split(self, dataset_size):
-        full_dataset = self.full_dataset.shuffle(1000)
-        self.train_dataset = full_dataset.take(int(self.train_size * dataset_size))
-        test_dataset = full_dataset.skip(int(self.train_size * dataset_size))
-        self.test_dataset = test_dataset.take(int(self.test_size * dataset_size))
-        val_dataset = test_dataset.skip(int(self.test_size * dataset_size))
-        self.val_dataset = val_dataset.take(int(self.val_size * dataset_size))
+        labels = self._get_labels_from_file_names(paths)
+
+        self.number_of_ds_examples = len(labels)
+        self.number_of_classes = len(set(labels))
+
+        labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
+
+        self.full_dataset = tf.data.Dataset.zip((file_paths_dataset, labels_dataset))
+
+        self._construct_train_test_split(dataset_size=len(labels))
 
     def _get_labels_from_file_names(self, paths):
         """

@@ -26,6 +26,14 @@ class DatasetReaderBase:
     def construct_dataset(self):
         pass
 
+    def _construct_train_test_split(self, dataset_size):
+        full_dataset = self.full_dataset.shuffle(1000)
+        self.train_dataset = full_dataset.take(self.get_number_of_examples('train'))
+        self.val_dataset = full_dataset.skip(self.get_number_of_examples('train')).take(
+            self.get_number_of_examples('val'))
+        self.test_dataset = full_dataset.skip(self.get_number_of_examples('train')).skip(
+            self.get_number_of_examples('val'))
+
     def _load_all_data_paths(self):
         paths = list()
         for dirpath, _, filenames in os.walk(self.dataset_path):
