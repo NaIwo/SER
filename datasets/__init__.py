@@ -1,1 +1,1 @@
-from .RAVDESS.ravdess_reader import RavdessReader
+from datasets.datasets_readers.ravdess.ravdess_reader import RavdessReader

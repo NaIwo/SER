@@ -22,7 +22,7 @@ if __name__ == '__main__':
                             total_length=80000,
                             padding_value=0.0,
                             train_size=0.0,
-                            val_size=1.0)  # because val is not shuffled
+                            test_size=1.0)  # because test is not shuffled
     preprocessor = Wav2VecPreprocessor(dataset, "wav2vec_large_data_cnn", Wav2VecModel(dataset.number_of_classes, agg=None, model='large'))
     preprocessor.preprocess_data()
 

@@ -22,7 +22,7 @@ def main():
                             total_length=80000,
                             padding_value=0.0,
                             train_size=0.0,
-                            val_size=1.0)  # because val is not shuffled
+                            test_size=1.0)  # because test is not shuffled
     preprocessor = GemapsPreprocessor(dataset, "egemaps2_low_level", opensmile.FeatureSet.eGeMAPSv02, opensmile.FeatureLevel.LowLevelDescriptors)
     preprocessor.preprocess_data()
 
