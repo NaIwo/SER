@@ -1,19 +1,20 @@
 import numpy as np
 import opensmile
+import tensorflow as tf
 
-from datasets import RavdessReader
+from datasets import RavdessReader, DatasetReaderBase
 from preprocessors.preprocessor import Preprocessor
 
 
 class GemapsPreprocessor(Preprocessor):
-    def __init__(self, dataset, target_dir, gemaps_type, gemaps_level):
+    def __init__(self, dataset: DatasetReaderBase, target_dir: str, gemaps_type, gemaps_level):
         super().__init__(dataset, target_dir)
         self.gemaps_extractor = opensmile.Smile(feature_set=gemaps_type, feature_level=gemaps_level)
 
-    def preprocess_single_example(self, example):
-        return self.gemaps_extractor.process_signal(example, self.dataset.desired_sampling_rate).to_numpy()[0]
+    def preprocess_single_example(self, example: tf.Tensor) -> np.ndarray:
+        return self.gemaps_extractor.process_signal(example.numpy(), self.dataset.desired_sampling_rate).to_numpy()[0]
 
-    def save_single_example(self, target_path, preprocessed_example):
+    def save_single_example(self, target_path: str, preprocessed_example: np.ndarray) -> None:
         np.save(target_path, preprocessed_example)
 
 

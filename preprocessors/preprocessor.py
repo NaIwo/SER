@@ -1,15 +1,20 @@
-import numpy as np
 import os
 from abc import abstractmethod
 from pathlib import Path
 
+import numpy as np
+
+from datasets import DatasetReaderBase
+import tensorflow as tf
+from typing import Optional
+
 
 class Preprocessor:
-    def __init__(self, dataset, target_dir):
+    def __init__(self, dataset: DatasetReaderBase, target_dir: str):
         self.dataset = dataset
         self.target_directory = target_dir
 
-    def preprocess_data(self):
+    def preprocess_data(self) -> None:
         path_iterator = self.dataset.val_dataset
 
         for path, y in path_iterator:
@@ -27,9 +32,9 @@ class Preprocessor:
             self.save_single_example(path_to_save, features)
 
     @abstractmethod
-    def preprocess_single_example(self, example):
+    def preprocess_single_example(self, example: tf.Tensor) -> Optional[tf.Tensor, np.ndarray]:
         pass
 
     @abstractmethod
-    def save_single_example(self, target_path, preprocessed_example):
+    def save_single_example(self, target_path: str, preprocessed_example: Optional[tf.Tensor, np.ndarray]) -> None:
         pass

@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, Type, TypeVar
 from functools import cached_property
 from pathlib import Path
 
+T = TypeVar('T', bound='DataLabels')
+
 
 class PathDetails:
-    def __init__(self, path):
+    def __init__(self, path: str):
         """
         https://zenodo.org/record/1188976
 
@@ -16,32 +18,32 @@ class PathDetails:
         Repetition (01 = 1st repetition, 02 = 2nd repetition).
         Actor (01 to 24. Odd numbered actors are male, even numbered actors are female).
         """
-        file_name = Path(path).stem
-        splitted_name = file_name.split('-')
+        file_name: str = Path(path).stem
+        splitted_name: List = file_name.split('-')
 
-        self.modality = splitted_name[0]
-        self.vocal_channel = splitted_name[1]
-        self.emotion = splitted_name[2]
-        self.emotional_intensity = splitted_name[3]
-        self.statement = splitted_name[4]
-        self.replication = splitted_name[5]
-        self.actor = splitted_name[6]
+        self.modality: str = splitted_name[0]
+        self.vocal_channel: str = splitted_name[1]
+        self.emotion: str = splitted_name[2]
+        self.emotional_intensity: str = splitted_name[3]
+        self.statement: str = splitted_name[4]
+        self.replication: str = splitted_name[5]
+        self.actor: str = splitted_name[6]
 
     @cached_property
-    def stratify_label(self):
+    def stratify_label(self) -> str:
         return self.emotion + str(int(self.actor) % 2)
 
     @cached_property
-    def proper_label(self):
+    def proper_label(self) -> int:
         return int(self.emotion) - 1
 
 
 class DataLabels:
     def __init__(self, path_details: List[PathDetails]):
-        self.path_details = path_details
+        self.path_details: List[PathDetails] = path_details
 
     @classmethod
-    def from_paths(cls, paths):
+    def from_paths(cls: Type[T], paths: List) -> T:
         details = list()
         for path in paths:
             detail = PathDetails(path)
