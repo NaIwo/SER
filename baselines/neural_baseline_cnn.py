@@ -40,7 +40,7 @@ if __name__ == '__main__':
                             total_length=80000,
                             padding_value=0.0,
                             train_size=0.7,
-                            val_size=0.2,
+                            test_size=0.1,
                             data_status='wav2vec_large_data_cnn')
     training(dataset)
     testing(dataset)
