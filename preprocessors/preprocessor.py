@@ -6,7 +6,7 @@ import numpy as np
 
 from datasets import DatasetReaderBase
 import tensorflow as tf
-from typing import Optional
+from typing import Union
 
 
 class Preprocessor:
@@ -15,7 +15,7 @@ class Preprocessor:
         self.target_directory = target_dir
 
     def preprocess_data(self) -> None:
-        path_iterator = self.dataset.val_dataset
+        path_iterator = self.dataset.test_dataset
 
         for path, y in path_iterator:
             data, _ = self.dataset._load_audio_raw(path, y)
@@ -32,9 +32,9 @@ class Preprocessor:
             self.save_single_example(path_to_save, features)
 
     @abstractmethod
-    def preprocess_single_example(self, example: tf.Tensor) -> Optional[tf.Tensor, np.ndarray]:
+    def preprocess_single_example(self, example: tf.Tensor) -> Union[tf.Tensor, np.ndarray, None]:
         pass
 
     @abstractmethod
-    def save_single_example(self, target_path: str, preprocessed_example: Optional[tf.Tensor, np.ndarray]) -> None:
+    def save_single_example(self, target_path: str, preprocessed_example: Union[tf.Tensor, np.ndarray, None]) -> None:
         pass
