@@ -32,9 +32,9 @@ class Preprocessor:
             self.save_single_example(path_to_save, features)
 
     @abstractmethod
-    def preprocess_single_example(self, example: tf.Tensor) -> Union[tf.Tensor, np.ndarray, None]:
+    def preprocess_single_example(self, example: tf.Tensor) -> Union[tf.Tensor, np.ndarray]:
         pass
 
     @abstractmethod
-    def save_single_example(self, target_path: str, preprocessed_example: Union[tf.Tensor, np.ndarray, None]) -> None:
+    def save_single_example(self, target_path: str, preprocessed_example: Union[tf.Tensor, np.ndarray]) -> None:
         pass

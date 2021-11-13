@@ -24,7 +24,7 @@ class RavdessReader(DatasetReaderBase):
 
     def _construct_stratify_train_test_split(self, paths: List, data_labels: DataLabels) -> None:
         indexes = np.array(range(self.number_of_ds_examples))
-        if self.get_number_of_examples('train') == 0 or self.get_number_of_examples('test') == 0:  # sklearn can't cope with splitting to empty set
+        if self.get_number_of_examples('train') == 0:  # sklearn can't cope with splitting to empty set
             train_idx, test_idx = list(range(self.get_number_of_examples('train'))), list(range(self.get_number_of_examples('test')))
         else:
             train_idx, test_idx = train_test_split(indexes,
