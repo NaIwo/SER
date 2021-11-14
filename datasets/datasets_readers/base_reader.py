@@ -105,19 +105,17 @@ class DatasetReaderBase:
             .batch(batch_size) \
             .prefetch(prefetch)
 
-    def get_map_func(self) -> Optional[Callable]:
+    def get_map_func(self) -> Callable:
         audio_func = self.get_audio_func()
         return lambda *items: tf.py_function(func=audio_func, inp=items, Tout=[tf.float64, tf.int32])
 
-    def get_audio_func(self) -> Optional[Callable]:
-        audio_func = None
+    def get_audio_func(self) -> Callable:
         if self.data_status == 'raw_data':
             return self._load_audio_raw
         elif self.data_status.startswith('wav2vec_'):
             return self._load_audio_wav2vec
-        elif self.data_status in ["mfcc", 'gemaps']:
+        else:
             return self._load_numpy_features
-        return audio_func
 
     def _load_audio_raw(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         audio, sample_rate = librosa.load(bytes.decode(file_path.numpy()), sr=self.desired_sampling_rate)
@@ -140,7 +138,7 @@ class DatasetReaderBase:
     @staticmethod
     def _load_numpy_features(file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         data = np.load(bytes.decode(file_path.numpy()))
-        return tf.convert_to_tensor(data), label
+        return tf.convert_to_tensor(data, dtype=tf.float64), label
 
     def get_numpy_dataset(self, dataset: tf.data.Dataset) -> Tuple[np.ndarray, np.ndarray]:
         self.assert_if_dataset_is_not_none(dataset)

@@ -6,13 +6,14 @@ import numpy as np
 
 from datasets import DatasetReaderBase
 import tensorflow as tf
-from typing import Union
+from typing import Union, Callable, Optional
 
 
 class Preprocessor:
-    def __init__(self, dataset: DatasetReaderBase, target_dir: str):
+    def __init__(self, dataset: DatasetReaderBase, target_dir: str, reduce_func: Optional[Callable] = None):
         self.dataset = dataset
         self.target_directory = target_dir
+        self.agg = reduce_func
 
     def preprocess_data(self) -> None:
         path_iterator = self.dataset.test_dataset
@@ -30,6 +31,9 @@ class Preprocessor:
             if not (os.path.exists(dir_to_save)):
                 Path(dir_to_save).mkdir(parents=True, exist_ok=True)
             self.save_single_example(path_to_save, features)
+
+    def preprocess_batch(self, batch: tf.Tensor):  # NOT TESTED
+        return tf.map_fn(self.preprocess_single_example, batch)
 
     @abstractmethod
     def preprocess_single_example(self, example: tf.Tensor) -> Union[tf.Tensor, np.ndarray]:
