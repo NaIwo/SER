@@ -18,9 +18,11 @@ class MfccPreprocessor(Preprocessor):
         self.window_function = window_function
 
     def preprocess_single_example(self, example: tf.Tensor) -> np.ndarray:
-        return self.agg(mfcc(example.numpy(), samplerate=self.dataset.desired_sampling_rate,
-                             numcep=self.coef_number, winlen=self.window_length, winstep=self.window_step,
-                             winfunc=self.window_function), axis=0)
+        mfccs = mfcc(example.numpy(), samplerate=self.dataset.desired_sampling_rate,
+                     numcep=self.coef_number, winlen=self.window_length, winstep=self.window_step,
+                     winfunc=self.window_function)
+        if self.agg is None: return mfccs
+        return self.agg(mfccs, axis=0)
 
     def save_single_example(self, target_path: str, preprocessed_example: np.ndarray):
         np.save(target_path, preprocessed_example)
