@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from typing import List, Iterable
 
-from datasets.datasets_readers.base_reader import DatasetReaderBase
-from datasets.datasets_readers.ravdess.data_details import DataLabels
+from src.datasets.datasets.base_dataset import BaseDataset
+from src.datasets.datasets.ravdess.data_details import DataLabels
 
 
-class RavdessReader(DatasetReaderBase):
+class RavdessDataset(BaseDataset):
     def __init__(self, **kwargs):
         super().__init__(dataset_name='Ravdess', **kwargs)
 

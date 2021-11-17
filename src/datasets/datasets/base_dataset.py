@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, List, Callable, Tuple
 
 
-class DatasetReaderBase:
+class BaseDataset:
     def __init__(self,
                  dataset_name: str,
                  desired_sampling_rate: int = 16000,

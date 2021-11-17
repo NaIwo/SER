@@ -3,12 +3,14 @@ from typing import Callable, Optional
 import numpy as np
 import tensorflow as tf
 
-from datasets import RavdessReader, DatasetReaderBase
-from preprocessors.preprocessor import Preprocessor
+from src.config_reader import config
+from src.datasets import get_dataset_by_name
+from src.datasets import BaseDataset
+from src.preprocessors.preprocessor import Preprocessor
 
 
 class MfccPreprocessor(Preprocessor):
-    def __init__(self, dataset: DatasetReaderBase, target_dir: str, reduce_func: Optional[Callable] = np.mean,
+    def __init__(self, dataset: BaseDataset, target_dir: str, reduce_func: Optional[Callable] = np.mean,
                  number_of_coefficients: int = 13, window_length: float = 0.025, window_step: float = 0.01,
                  window_function: Callable = np.hamming):
         super().__init__(dataset, target_dir, reduce_func)
@@ -29,12 +31,16 @@ class MfccPreprocessor(Preprocessor):
 
 
 def main():
-    dataset = RavdessReader(desired_sampling_rate=16000,
-                            total_length=80000,
-                            padding_value=0.0,
-                            train_size=0.0,
-                            test_size=1.0)  # because test is not shuffled
-    preprocessor = MfccPreprocessor(dataset, "mfcc", number_of_coefficients=25)
+    Dataset = get_dataset_by_name(config['data']['dataset']['name'])
+    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
+                      total_length=config['data']['dataset']['desired-length'],
+                      padding_value=config['data']['dataset']['padding-value'],
+                      train_size=0.0,
+                      test_size=1.0,
+                      data_status='raw_data',
+                      train_test_seed=config['data']['dataset']['shuffle-seed'])
+    preprocessor = MfccPreprocessor(dataset, config['data']['source-name'],
+                                    number_of_coefficients=config['model']['gemaps-mfcc']['number-coefficients'])
     preprocessor.preprocess_data()
 
 

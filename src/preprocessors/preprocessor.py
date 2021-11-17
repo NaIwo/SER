@@ -4,13 +4,13 @@ from pathlib import Path
 
 import numpy as np
 
-from datasets import DatasetReaderBase
+from src.datasets import BaseDataset
 import tensorflow as tf
 from typing import Union, Callable, Optional
 
 
 class Preprocessor:
-    def __init__(self, dataset: DatasetReaderBase, target_dir: str, reduce_func: Optional[Callable] = None):
+    def __init__(self, dataset: BaseDataset, target_dir: str, reduce_func: Optional[Callable] = None):
         self.dataset = dataset
         self.target_directory = target_dir
         self.agg = reduce_func

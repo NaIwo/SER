@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
@@ -9,8 +9,12 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.preprocessing import StandardScaler
 from matplotlib import pyplot as plt
 import numpy as np
+import os
+from pathlib import Path
 
-from datasets import RavdessReader
+from src.config_reader import config
+
+from src.datasets import get_dataset_by_name
 
 class_labels = ["Neutral", "calm", "happy", "sad", "angry", "fearful", "disgust", "surprised"]
 
@@ -37,19 +41,29 @@ def remove_correlated_features(x_train: np.ndarray, x_test: np.ndarray, indices:
     return np.delete(x_train.T, indices, axis=0).T, np.delete(x_test.T, indices, axis=0).T
 
 
-def plot_results(results: list[float], labels: list[str], metric_name: str,
+def plot_results(results: List[float], labels: List[str], metric_name: str,
                  data_type: str, save_plot: bool = False) -> None:
     plt.bar(range(len(results)), results)
     plt.xticks(range(len(results)), labels)
     plt.title(f"{data_type} data")
     plt.ylabel(metric_name)
     if save_plot:
-        plt.savefig(f"results/{data_type}")
+        dir_to_save = config['model']['gemaps-mfcc']['plot-dir']
+        if not os.path.exists(dir_to_save):
+            Path(dir_to_save).mkdir(parents=True, exist_ok=True)
+        plt.savefig(os.path.join(dir_to_save, data_type))
     plt.show()
 
 
 def main():
-    dataset = RavdessReader(data_status='mfcc')
+    Dataset = get_dataset_by_name(config['data']['dataset']['name'])
+    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
+                      total_length=config['data']['dataset']['desired-length'],
+                      padding_value=config['data']['dataset']['padding-value'],
+                      train_size=config['data']['dataset']['train-size'],
+                      test_size=config['data']['dataset']['test-size'],
+                      data_status=config['data']['source-name'],
+                      train_test_seed=config['data']['dataset']['shuffle-seed'])
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)
     correlated_features_indices = get_correlated_features_indices(x_train)
