@@ -1,10 +1,12 @@
 data:
-  source-name: wav2vec_large_data_sum  # if you process data with a preprocessor, this name will be taken as the data output directory.
+  source-name: wav2vec_mean  # if you process data with a preprocessor, this name will be taken as the data output directory.
+  path-extension: wav
   dataset:
-    name: RAVDESS
+    name: MELD
     batch-size: 32
-    train-size: 0.7
-    test-size: 0.1
+    train-size: 1.0
+    test-size: 1.0
+    val-size: 1.0
     desired-sampling-rate: 16000
     prefetch: 2
     desired-length: null
@@ -14,16 +16,16 @@ model:
   wav2vec2:
     name: Wav2vecClassifier
     pretrained-model: facebook/wav2vec2-base-960h
-    save-dir: ../../results/saved_models/ravdess_mlp_clf
+    save-dir: ../../results/saved_models/meld/meld_mlp_clf
     aggregation: mean
     mode: training # {training, testing}
-    train-epochs: 2
+    train-epochs: 6
   gemaps-mfcc:
     plot-dir: ../../results/plots
     mfcc:
       number-coefficients: 25
     gmaps:
-
+      ~
 
 
 

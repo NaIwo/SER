@@ -1,4 +1,3 @@
-import os
 from envyaml import EnvYAML
 
 
@@ -13,6 +12,6 @@ class ConfigReader:
 
 
 try:
-    config = ConfigReader.read_config(os.path.join('../..', 'config.yml'))
+    config = ConfigReader.read_config('../../config.yml')
 except FileNotFoundError as e:
-    config = ConfigReader.read_config('../config.yml')
+    config = ConfigReader.read_config('../../../config.yml')

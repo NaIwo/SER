@@ -10,6 +10,7 @@ from src.datasets.datasets.ravdess.data_details import DataLabels
 class RavdessDataset(BaseDataset):
     def __init__(self, **kwargs):
         super().__init__(dataset_name='Ravdess', **kwargs)
+        self._construct_datasets()
 
     def _construct_datasets(self) -> None:
         paths: List = self._load_all_data_paths()

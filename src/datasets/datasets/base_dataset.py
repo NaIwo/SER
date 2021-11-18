@@ -4,6 +4,7 @@ import os
 import numpy as np
 import librosa
 from pathlib import Path
+import warnings
 from typing import Optional, List, Callable, Tuple
 
 
@@ -13,6 +14,7 @@ class BaseDataset:
                  desired_sampling_rate: int = 16000,
                  train_size: float = 0.7,
                  test_size: float = 0.3,
+                 val_size: Optional[float] = None,
                  total_length: Optional[int] = None,
                  padding_value: Optional[int] = None,
                  data_status: str = 'raw_data',
@@ -24,7 +26,7 @@ class BaseDataset:
 
         self.train_size: float = train_size
         self.test_size: float = test_size
-        self.val_size: float = 1. - (train_size + test_size)
+        self.val_size: float = val_size if val_size is not None else 1. - (train_size + test_size)
 
         self.data_status: str = data_status
 
@@ -42,8 +44,6 @@ class BaseDataset:
         self.test_dataset: Optional[tf.data.Dataset] = None  # has to be initialized
 
         self.train_test_seed: int = train_test_seed
-
-        self._construct_datasets()
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -65,14 +65,15 @@ class BaseDataset:
             return self.number_of_ds_examples
         elif set_name == 'train':
             return int(self.train_size * self.number_of_ds_examples)
-        elif set_name == 'val':
+        elif set_name == 'val' or set_name == 'dev':
             return int(self.val_size * self.number_of_ds_examples)
         elif set_name == 'test':
             return int(self.test_size * self.number_of_ds_examples)
 
-    def _load_all_data_paths(self) -> List:
+    def _load_all_data_paths(self, split_name: str = '') -> List:
         paths = list()
-        for dirpath, _, filenames in os.walk(self.dataset_relative_path):
+        path_to_walk = os.path.join(self.dataset_relative_path, split_name)
+        for dirpath, _, filenames in os.walk(path_to_walk):
             paths += [os.path.join(dirpath, filename) for filename in filenames]
         return paths
 
@@ -118,6 +119,7 @@ class BaseDataset:
             return self._load_numpy_features
 
     def _load_audio_raw(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+        warnings.filterwarnings('ignore')
         audio, sample_rate = librosa.load(bytes.decode(file_path.numpy()), sr=self.desired_sampling_rate)
         if self.padding_value is None or self.total_length is None:
             return tf.convert_to_tensor(audio, dtype=tf.float64), label

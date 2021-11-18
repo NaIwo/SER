@@ -18,6 +18,8 @@ class Wav2vecClassifier(tf.keras.Model):
             tf.keras.layers.Dropout(0.1),
             tf.keras.layers.Dense(self.wav2vec.config.hidden_size // 2, activation='relu'),
             tf.keras.layers.Dropout(0.1),
+            tf.keras.layers.Dense(self.wav2vec.config.hidden_size // 2, activation='relu'),
+            tf.keras.layers.Dropout(0.1),
             tf.keras.layers.Dense(self.wav2vec.config.hidden_size // 4, activation='relu'),
             tf.keras.layers.Dropout(0.1),
             tf.keras.layers.Dense(num_of_classes, activation='softmax')

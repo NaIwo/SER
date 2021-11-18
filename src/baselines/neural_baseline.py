@@ -47,6 +47,7 @@ if __name__ == '__main__':
                       padding_value=config['data']['dataset']['padding-value'],
                       train_size=config['data']['dataset']['train-size'],
                       test_size=config['data']['dataset']['test-size'],
+                      val_size=config['data']['dataset']['val-size'],
                       data_status=config['data']['source-name'],
                       train_test_seed=config['data']['dataset']['shuffle-seed'])
 

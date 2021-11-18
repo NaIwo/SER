@@ -7,7 +7,7 @@ from src.config_reader import config
 class Wav2VecModel:
     def __init__(self, num_of_classes):
 
-        self.wav2vec_name = config['model']['wav2vec2']
+        self.wav2vec_name = config['model']['wav2vec2']['pretrained-model']
 
         self.agg = config['model']['wav2vec2']['aggregation']
 
@@ -29,7 +29,8 @@ class Wav2VecModel:
         self.processor = Wav2Vec2Processor.from_pretrained(self.wav2vec_name)
 
     def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
-        wav2vec_out = self.processor(inputs, sampling_rate=self.sampling_rate, return_tensors='tf')
+        wav2vec_out = self.processor(inputs, sampling_rate=self.sampling_rate, padding_value=self.padding_value,
+                                     return_tensors='tf')
         wav2vec_out = tf.squeeze(wav2vec_out.input_values, axis=0)
         wav2vec_out = self.wav2vec(wav2vec_out, training=False)
 

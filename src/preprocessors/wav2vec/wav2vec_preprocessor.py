@@ -25,8 +25,9 @@ if __name__ == '__main__':
     dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
                       total_length=config['data']['dataset']['desired-length'],
                       padding_value=config['data']['dataset']['padding-value'],
-                      train_size=0.0,
-                      test_size=1.0,
+                      train_size=config['data']['dataset']['train-size'],
+                      test_size=config['data']['dataset']['test-size'],
+                      val_size=config['data']['dataset']['val-size'],
                       data_status='raw_data',
                       train_test_seed=config['data']['dataset']['shuffle-seed'])
     preprocessor = Wav2VecPreprocessor(dataset, config['data']['source-name'], Wav2VecModel(dataset.number_of_classes))
