@@ -21,9 +21,33 @@ model:
     mode: training # {training, testing}
     train-epochs: 6
   gemaps-mfcc:
-    plot-dir: ../../results/plots
+    classic:
+      plot-dir: ../../results/plots
+      model-labels:
+        - SVM
+        - RF
+        - LR
+        - MLP
+        - DT
+        - GBT
+      svm:
+        c: 100
+      random-forest:
+        split-criterion: entropy
+        max-depth: 12
+      logistic-regression:
+        c: 50
+      mlp:
+        max-iter: 500
+      gbt:
+        subsample: 0.5
     mfcc:
-      number-coefficients: 25
+      save-dir: ../../results/saved_models/ravdess/mfcc_cnn_clf
+      batch-size: 32
+      number-coefficients: 13
+      number-windows: 499
+      train-epochs: 40
+      mode: trainingg
     gmaps:
       ~
 

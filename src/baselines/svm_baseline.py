@@ -56,15 +56,16 @@ def plot_results(results: List[float], labels: List[str], metric_name: str,
 
 
 def main():
-    Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
-                      total_length=config['data']['dataset']['desired-length'],
-                      padding_value=config['data']['dataset']['padding-value'],
-                      train_size=config['data']['dataset']['train-size'],
-                      test_size=config['data']['dataset']['test-size'],
-                      val_size=config['data']['dataset']['val-size'],
+    dataset_props = config['data']['dataset']
+    Dataset = get_dataset_by_name(dataset_props['name'])
+    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
+                      total_length=dataset_props['desired-length'],
+                      padding_value=dataset_props['padding-value'],
+                      train_size=dataset_props['train-size'],
+                      test_size=dataset_props['test-size'],
+                      val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=config['data']['dataset']['shuffle-seed'])
+                      train_test_seed=dataset_props['shuffle-seed'])
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)
     correlated_features_indices = get_correlated_features_indices(x_train)
@@ -74,9 +75,16 @@ def main():
     x_train = standard_scaler.transform(x_train)
     x_test = standard_scaler.transform(x_test)
     results = []
-    labels = ["SVM", "RF", "LR", "MLP", "DT", "GBT"]
-    for model in (SVC(C=100), RandomForestClassifier(criterion='entropy', max_depth=12), LogisticRegression(C=50),
-                  MLPClassifier(max_iter=500), DecisionTreeClassifier(), GradientBoostingClassifier(subsample=0.5)):
+
+    properties = config['model']['gemaps-mfcc']['classic']
+    labels = properties['model-labels']
+    for model in (SVC(C=properties['svm']['c']),
+                  RandomForestClassifier(criterion=properties['random-forest']['split-criterion'],
+                                         max_depth=properties['random-forest']['max-depth']),
+                  LogisticRegression(C=properties['logistic-regression']['c']),
+                  MLPClassifier(properties['mlp']['max-iter']),
+                  DecisionTreeClassifier(),
+                  GradientBoostingClassifier(subsample=properties['gbt']['subsample'])):
         model.fit(x_train, y_train)
         y_pred = model.predict(x_test)
         print_metrics(y_test, y_pred)
