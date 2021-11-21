@@ -3,7 +3,7 @@ import numpy as np
 
 
 def train_mfcc_cnn(model: tf.keras.Model, train_ds: tf.data.Dataset, val_ds: tf.data.Dataset, epochs: int):
-    optimizer = tf.keras.optimizers.Adam()
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
     val_losses = list()
     for epoch in range(epochs):
         for step, (x, y) in enumerate(train_ds):

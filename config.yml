@@ -46,8 +46,8 @@ model:
       batch-size: 32
       number-coefficients: 13
       number-windows: 499
-      train-epochs: 40
-      mode: trainingg
+      train-epochs: 50
+      mode: training
     gmaps:
       ~
 
