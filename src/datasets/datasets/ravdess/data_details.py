@@ -1,6 +1,6 @@
 from typing import List, Type, TypeVar
-from functools import cached_property
 from pathlib import Path
+from functools import cached_property
 
 T = TypeVar('T', bound='DataLabels')
 

@@ -15,10 +15,13 @@ class Preprocessor:
         self.target_directory = target_dir
         self.agg = reduce_func
 
+    def _load_audio(self, path, y):
+        return self.dataset._load_audio_raw(path, y)
+
     def preprocess_data(self) -> None:
         for path_iterator in [self.dataset.train_dataset, self.dataset.test_dataset, self.dataset.val_dataset]:
             for path, y in path_iterator:
-                data, _ = self.dataset._load_audio_raw(path, y)
+                data, _ = self._load_audio(path, y)
                 raw_path_string = bytes.decode(path.numpy())
                 raw_path_string = raw_path_string.replace('raw_data', self.target_directory)
 

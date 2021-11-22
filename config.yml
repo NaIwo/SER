@@ -26,7 +26,10 @@ model:
       number-coefficients: 25
     gmaps:
       ~
-
-
-
-
+  asr:
+    name: asr
+    tfhub: https://tfhub.dev/silero/silero-stt/en/1
+    decoder:
+      repo: snakers4/silero-models
+      model: silero_stt
+      language: en
