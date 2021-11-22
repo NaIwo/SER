@@ -1,6 +1,7 @@
 from typing import List, Type, TypeVar
 from envyaml import EnvYAML
 from pathlib import Path
+from functools import cached_property
 import os
 
 from src.config_reader import ConfigReader
@@ -38,7 +39,7 @@ class PathDetails:
         self.utterance: str = metadata[self.file_name]['Utterance']
         self.utterance_id: str = metadata[self.file_name]['Utterance_ID']
 
-    @property
+    @cached_property
     def proper_label(self) -> int:
         return emotion2id[self.emotion]
 
@@ -55,7 +56,7 @@ class DataLabels:
             details.append(detail)  # speech
         return cls(details)
 
-    @property
+    @cached_property
     def labels(self):
         labels = list()
         for details in self.path_details:

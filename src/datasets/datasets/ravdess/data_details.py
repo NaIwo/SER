@@ -1,5 +1,6 @@
 from typing import List, Type, TypeVar
 from pathlib import Path
+from functools import cached_property
 
 T = TypeVar('T', bound='DataLabels')
 
@@ -28,9 +29,11 @@ class PathDetails:
         self.replication: str = splitted_name[5]
         self.actor: str = splitted_name[6]
 
+    @cached_property
     def stratify_label(self) -> str:
         return self.emotion + str(int(self.actor) % 2)
 
+    @cached_property
     def proper_label(self) -> int:
         return int(self.emotion) - 1
 
@@ -47,12 +50,14 @@ class DataLabels:
             details.append(detail)  # speech
         return cls(details)
 
+    @cached_property
     def labels(self):
         labels = list()
         for details in self.path_details:
             labels.append(details.proper_label)
         return labels
 
+    @cached_property
     def stratify_labels(self):
         stratify_labels = list()
         for details in self.path_details:
