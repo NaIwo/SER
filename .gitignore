@@ -1,7 +1,9 @@
 __pycache__/
 .idea/
+venv/
 
-datasets/RAVDESS/raw_data
-datasets/RAVDESS/wav2vec_*
+src/datasets/datasets_files/RAVDESS/*
+src/datasets/datasets_files/MELD/*
+!src/datasets/datasets_files/MELD/meld_metadata.yml
 
-baselines/wav2vec_neural/wav2vec_clf_*/*
+results/saved_models/*
