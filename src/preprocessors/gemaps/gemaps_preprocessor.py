@@ -9,15 +9,34 @@ from src.preprocessors.preprocessor import Preprocessor
 
 
 class GemapsPreprocessor(Preprocessor):
-    def __init__(self, dataset: BaseDataset, target_dir: str, gemaps_type, gemaps_level):
+    def __init__(self, dataset: BaseDataset, target_dir: str, gemaps_type, gemaps_level,
+                 window_length: float = 0.06, window_step: float = 0.02):
         super().__init__(dataset, target_dir)
-        self.gemaps_extractor = opensmile.Smile(feature_set=gemaps_type, feature_level=gemaps_level)
+        if gemaps_level == opensmile.FeatureLevel.LowLevelDescriptors:
+            self.window_size = window_length
+            self.hop_size = window_step
+        self.gemaps_extractor = opensmile.Smile(feature_set=gemaps_type, feature_level=gemaps_level, num_workers=None)
 
     def preprocess_single_example(self, example: tf.Tensor) -> np.ndarray:
-        return self.gemaps_extractor.process_signal(example.numpy(), self.dataset.desired_sampling_rate).to_numpy()[0]
+        #windowed_signal = librosa.util.frame(example.numpy(), self.number_of_samples_per_window, self.hop_size, axis=0)
+        if self.gemaps_extractor.feature_level == opensmile.FeatureLevel.LowLevelDescriptors:
+            return self.__compute_llds(example)
+        return self.__compute_functionals(example)
 
     def save_single_example(self, target_path: str, preprocessed_example: np.ndarray) -> None:
         np.save(target_path, preprocessed_example)
+
+    def __compute_llds(self, example: tf.Tensor):
+        numpy_signal = example.numpy()
+        preprocessed_signal = []
+        for window_end in np.arange(self.window_size, stop=numpy_signal.size / self.dataset.desired_sampling_rate, step=self.hop_size):
+            preprocessed_signal.append(
+                self.gemaps_extractor.process_signal(numpy_signal, self.dataset.desired_sampling_rate,
+                                                     start=window_end - self.window_size, end=window_end).to_numpy()[0])
+        return np.array(preprocessed_signal)
+
+    def __compute_functionals(self, example: tf.Tensor):
+        return self.gemaps_extractor.process_signal(example.numpy(), self.dataset.desired_sampling_rate).to_numpy()[0]
 
 
 def main():
@@ -30,7 +49,7 @@ def main():
                       val_size=config['data']['dataset']['val-size'],
                       data_status='raw_data',
                       train_test_seed=config['data']['dataset']['shuffle-seed'],
-                      resample_training_set=config['data']['dataset']['resample-training-set'])
+                      resample_training_set=False)
     preprocessor = GemapsPreprocessor(dataset, config['data']['source-name'], opensmile.FeatureSet.eGeMAPSv02,
                                       opensmile.FeatureLevel.Functionals)
     preprocessor.preprocess_data()

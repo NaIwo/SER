@@ -1,12 +1,12 @@
 import tensorflow as tf
 
 
-class MfccCNN(tf.keras.Model):
+class MfccCNN(tf.keras.Model):  # worked well on MFCCs / RAVDESS
     def get_config(self):
         super(MfccCNN, self).get_config()
 
     def __init__(self, num_of_classes: int, num_of_coefficients: int, num_of_windows: int):
-        super().__init__(name='mfcc_classifier_cnn')
+        super().__init__(name='mfcc_classifier_cnn2d')
 
         self.clf = tf.keras.models.Sequential([
             tf.keras.layers.InputLayer(input_shape=(num_of_coefficients, num_of_windows, 1)),

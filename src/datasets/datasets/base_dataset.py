@@ -20,7 +20,9 @@ class BaseDataset:
                  padding_value: Optional[int] = None,
                  data_status: str = 'raw_data',
                  train_test_seed: Optional[int] = None,
-                 resample_training_set: bool = False):
+                 resample_training_set: bool = False,
+                 crop: bool = False,
+                 number_of_windows: int = 140):
 
         self.dataset_name: str = dataset_name
 
@@ -47,6 +49,9 @@ class BaseDataset:
 
         self.train_test_seed: int = train_test_seed
         self.resample_training_set = resample_training_set
+
+        self.crop = crop
+        self.number_of_windows = number_of_windows
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -151,9 +156,10 @@ class BaseDataset:
         audio = np.load(bytes.decode(file_path.numpy()))[0]
         return tf.convert_to_tensor(audio, dtype=tf.float64), label
 
-    @staticmethod
-    def _load_numpy_features(file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+    def _load_numpy_features(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         data = np.load(bytes.decode(file_path.numpy()))
+        if self.crop:
+            data = data[:self.number_of_windows]
         return tf.convert_to_tensor(data, dtype=tf.float64), label
 
     def get_numpy_dataset(self, dataset: tf.data.Dataset) -> Tuple[np.ndarray, np.ndarray]:

@@ -70,6 +70,10 @@ def main():
                       resample_training_set=dataset_props['resample-training-set'])
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)
+    if len(x_train.shape) == 3:
+        x_train = x_train[:, 0]
+    if len(x_test.shape) == 3:
+        x_test = x_test[:, 0]
     correlated_features_indices = get_correlated_features_indices(x_train)
     x_train, x_test = remove_correlated_features(x_train, x_test, correlated_features_indices)
     standard_scaler = StandardScaler()

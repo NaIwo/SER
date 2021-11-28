@@ -51,7 +51,12 @@ model:
       train-epochs: 50
       mode: training
     gmaps:
-      ~
+      save-dir: ../../results/saved_models/ravdess/gemaps_cnn_clf
+      batch-size: 32
+      number-coefficients: 25
+      number-windows: 499
+      train-epochs: 50
+      mode: training
 
 
 

@@ -3,8 +3,8 @@ import numpy as np
 from sklearn.metrics import recall_score
 
 
-def train_mfcc_cnn(model: tf.keras.Model, train_ds: tf.data.Dataset, val_ds: tf.data.Dataset, epochs: int):
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.05)
+def train(model: tf.keras.Model, train_ds: tf.data.Dataset, val_ds: tf.data.Dataset, epochs: int):
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
     val_losses = list()
     for epoch in range(epochs):
         for step, (x, y) in enumerate(train_ds):
@@ -16,13 +16,13 @@ def train_mfcc_cnn(model: tf.keras.Model, train_ds: tf.data.Dataset, val_ds: tf.
 
             print(f"\rEpoch {epoch + 1}/{epochs}, Step {step}, Loss {np.mean(loss_value)}", end='', flush=True)
         print()
-        val_loss = test_mfcc_cnn(model, val_ds)
+        val_loss = test(model, val_ds)
         val_losses.append(np.mean(val_loss))
 
     return model
 
 
-def test_mfcc_cnn(model: tf.keras.Model, test_ds: tf.data.Dataset):
+def test(model: tf.keras.Model, test_ds: tf.data.Dataset):
     test_loss = np.array([])
     accuracy = np.array([])
     y_cum, y_pred_cum = [], []

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from src.baselines.mfcc_gemaps_trainers import *
-from src.baselines.mfcc_cnn.models.mfcc_classifiers import MfccCNN
+from src.baselines.gemaps_cnn.models.gemaps_classifiers import *
 from src.config_reader import config
 from src.datasets import get_dataset_by_name
 
@@ -33,13 +33,15 @@ def main():
                       val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
                       train_test_seed=dataset_props['shuffle-seed'],
-                      resample_training_set=dataset_props['resample-training-set'])
-    model_props = config['model']['gemaps-mfcc']['mfcc']
+                      resample_training_set=dataset_props['resample-training-set'],
+                      crop=True,
+                      number_of_windows=140)
+    model_props = config['model']['gemaps-mfcc']['gmaps']
     batch_size = model_props['batch-size']
     train_iterator = dataset.train_iterator(batch_size=batch_size)
     val_iterator = dataset.val_iterator(batch_size=batch_size)
     test_iterator = dataset.test_iterator(batch_size=batch_size)
-    model = MfccCNN(dataset.number_of_classes, model_props['number-windows'], model_props['number-coefficients'])
+    model = GemapsCNN(dataset.number_of_classes, model_props['number-coefficients'], model_props['number-windows'], 1, 4)
     weights_dir = model_props['save-dir']
 
     if model_props['mode'] == 'training':
