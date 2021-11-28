@@ -113,7 +113,7 @@ class BaseDataset:
     def get_audio_func(self) -> Callable:
         if self.data_status == 'raw_data':
             return self._load_audio_raw
-        elif self.data_status.startswith('wav2vec_'):
+        elif 'wav2vec' in self.data_status:
             return self._load_audio_wav2vec
         else:
             return self._load_numpy_features
@@ -146,7 +146,7 @@ class BaseDataset:
         self.assert_if_dataset_is_not_none(dataset)
 
         numpy_dataset = np.array(list(dataset.map(self.get_map_func()).as_numpy_iterator()), dtype=object)
-        return np.stack(numpy_dataset[:, 0]), numpy_dataset[:, 1].astype("int32")
+        return np.stack(numpy_dataset[:, 0]).squeeze(), numpy_dataset[:, 1].astype("int32").squeeze()
 
     @staticmethod
     def assert_if_dataset_is_not_none(dataset: tf.data.Dataset) -> None:

@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+from sklearn.metrics import recall_score
+
 
 def train_wav2vec(model, train_ds, val_ds, epochs, use_wav2vec=True):
     optimizer = tf.keras.optimizers.Adam()
@@ -28,6 +30,7 @@ def train_wav2vec(model, train_ds, val_ds, epochs, use_wav2vec=True):
 def test_wav2vec(model, test_ds, use_wav2vec=True):
     test_loss = np.array([])
     accuracy = np.array([])
+    recall_scores = np.array([])
     for x, y in test_ds:
         if use_wav2vec:
             data = model.wav2vec(x)
@@ -38,6 +41,8 @@ def test_wav2vec(model, test_ds, use_wav2vec=True):
         test_loss = np.append(test_loss, loss_value.numpy())
         acc = tf.keras.metrics.sparse_categorical_accuracy(y, y_pred)
         accuracy = np.append(accuracy, acc.numpy())
-    print(f"\rDev Loss {np.mean(test_loss)}, Accuracy: {np.mean(accuracy)}", end='', flush=True)
+        recall = recall_score(y.numpy(), np.argmax(y_pred.numpy(), axis=1), average="macro", zero_division=0)
+        recall_scores = np.append(recall_scores, recall)
+    print(f"\rDev Loss {np.mean(test_loss)}, Accuracy: {np.mean(accuracy)}, Recall: {np.mean(recall_scores)}", end='', flush=True)
     print()
     return test_loss

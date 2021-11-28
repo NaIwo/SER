@@ -19,8 +19,11 @@ class Preprocessor:
         return self.dataset._load_audio_raw(path, y)
 
     def preprocess_data(self) -> None:
-        for path_iterator in [self.dataset.train_dataset, self.dataset.test_dataset, self.dataset.val_dataset]:
+        for path_iterator in [self.dataset.test_dataset]:
+            a = os.listdir('/home/iwo/Pulpit/Studia/SER/src/datasets/datasets_files/MELD/960wav2vec_mean_normalized/test/output_repeated_splits_test')
             for path, y in path_iterator:
+                if bytes.decode(path.numpy()).split('/')[-1].replace('.wav', '.npy') in a:
+                    continue
                 data, _ = self._load_audio(path, y)
                 raw_path_string = bytes.decode(path.numpy())
                 raw_path_string = raw_path_string.replace('raw_data', self.target_directory)

@@ -1,5 +1,5 @@
 data:
-  source-name: wav2vec_mean  # if you process data with a preprocessor, this name will be taken as the data output directory.
+  source-name: 960wav2vec_mean_normalized  # if you process data with a preprocessor, this name will be taken as the data output directory.
   path-extension: wav
   dataset:
     name: MELD
@@ -7,7 +7,7 @@ data:
     train-size: 1.0
     test-size: 1.0
     val-size: 1.0
-    desired-sampling-rate: 16000
+    desired-sampling-rate: null
     prefetch: 2
     desired-length: null
     padding-value: 0.0
@@ -15,11 +15,14 @@ data:
 model:
   wav2vec2:
     name: Wav2vecClassifier
+    preprocessor: facebook/wav2vec2-base-960h
     pretrained-model: facebook/wav2vec2-base-960h
     save-dir: ../../results/saved_models/meld/meld_mlp_clf
-    aggregation: mean
+    aggregation: mean # {sum, mean, null}
     mode: training # {training, testing}
     train-epochs: 6
+    normalize: true
+    desired-sampling-rate: 16000
   gemaps-mfcc:
     plot-dir: ../../results/plots
     mfcc:
