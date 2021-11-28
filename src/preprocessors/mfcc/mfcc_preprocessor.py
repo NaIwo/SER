@@ -45,7 +45,7 @@ def main():
                       val_size=dataset_props['val-size'],
                       data_status='raw_data',
                       train_test_seed=dataset_props['shuffle-seed'],
-                      resample_training_set=dataset_props['resample-training-set'])
+                      resample_training_set=False)
     preprocessor = MfccPreprocessor(dataset, config['data']['source-name'], reduce_func=None, expand_dimension=True)
     preprocessor.preprocess_data()
 
