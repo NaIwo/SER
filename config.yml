@@ -12,6 +12,7 @@ data:
     desired-length: null
     padding-value: 0.0
     shuffle-seed: null
+    resample-training-set: False
 model:
   wav2vec2:
     name: Wav2vecClassifier
@@ -37,6 +38,7 @@ model:
         max-depth: 12
       logistic-regression:
         c: 50
+        max-iter: 1000
       mlp:
         max-iter: 500
       gbt:

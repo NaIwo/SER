@@ -1,3 +1,4 @@
+import random
 from abc import abstractmethod
 import tensorflow as tf
 import os
@@ -18,7 +19,8 @@ class BaseDataset:
                  total_length: Optional[int] = None,
                  padding_value: Optional[int] = None,
                  data_status: str = 'raw_data',
-                 train_test_seed: Optional[int] = None):
+                 train_test_seed: Optional[int] = None,
+                 resample_training_set: bool = False):
 
         self.dataset_name: str = dataset_name
 
@@ -44,6 +46,7 @@ class BaseDataset:
         self.test_dataset: Optional[tf.data.Dataset] = None  # has to be initialized
 
         self.train_test_seed: int = train_test_seed
+        self.resample_training_set = resample_training_set
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -76,6 +79,17 @@ class BaseDataset:
         for dirpath, _, filenames in os.walk(path_to_walk):
             paths += [os.path.join(dirpath, filename) for filename in filenames]
         return paths
+
+    def _resample_dataset(self, idx: List, labels: List, dataset_size: int) -> List:
+        idx_by_class = []
+        resampled_idx = []
+        samples_per_class = int(dataset_size / self.number_of_classes)
+        for i in range(self.number_of_classes):
+            idx_by_class.append([index for index in idx if i == labels[index]])
+        for class_idx in idx_by_class:
+            resampled_idx += random.choices(class_idx, k=samples_per_class)
+        random.shuffle(resampled_idx)
+        return resampled_idx
 
     def train_iterator(self, batch_size: int = 32, shuffle_buffer_size: int = 1024, prefetch: int = 3,
                        num_parallel_calls: int = -1) -> tf.data.Dataset:

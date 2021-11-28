@@ -27,6 +27,8 @@ class MeldDataset(BaseDataset):
             setattr(self, var, len(paths))
             idx = random.sample(range(getattr(self, var)), self.get_number_of_examples(name))
             data_labels: DataLabels = DataLabels.from_paths(paths)
+            if dataset == 'train_dataset' and self.resample_training_set:
+                idx = self._resample_dataset(idx, data_labels.labels, self.get_number_of_examples(name))
             setattr(self, dataset, self._build_datasets_with_x_y(self._get_items_by_indexes(paths, idx),
                                                                  self._get_items_by_indexes(data_labels.labels, idx)))
 

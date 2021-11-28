@@ -29,7 +29,8 @@ def main():
                       test_size=config['data']['dataset']['test-size'],
                       val_size=config['data']['dataset']['val-size'],
                       data_status='raw_data',
-                      train_test_seed=config['data']['dataset']['shuffle-seed'])
+                      train_test_seed=config['data']['dataset']['shuffle-seed'],
+                      resample_training_set=config['data']['dataset']['resample-training-set'])
     preprocessor = GemapsPreprocessor(dataset, config['data']['source-name'], opensmile.FeatureSet.eGeMAPSv02,
                                       opensmile.FeatureLevel.Functionals)
     preprocessor.preprocess_data()

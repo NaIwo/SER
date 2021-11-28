@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score
 from sklearn.preprocessing import StandardScaler
 from matplotlib import pyplot as plt
 import numpy as np
@@ -23,6 +23,7 @@ def print_metrics(y_true, y_pred):
     print("Class labels: ", class_labels)
     print("Confusion matrix:", confusion_matrix(y_true, y_pred), sep="\n")
     print("Classification accuracy:", accuracy_score(y_true, y_pred))
+    print("Average recall:", recall_score(y_true, y_pred, average="macro"))
 
 
 def get_correlated_features_indices(data: np.ndarray, threshold: float = 0.9) -> list:
@@ -65,7 +66,8 @@ def main():
                       test_size=dataset_props['test-size'],
                       val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=dataset_props['shuffle-seed'])
+                      train_test_seed=dataset_props['shuffle-seed'],
+                      resample_training_set=dataset_props['resample-training-set'])
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)
     correlated_features_indices = get_correlated_features_indices(x_train)
@@ -78,12 +80,15 @@ def main():
 
     properties = config['model']['gemaps-mfcc']['classic']
     labels = properties['model-labels']
-    for model in (SVC(C=properties['svm']['c']),
+    for model in (SVC(C=properties['svm']['c'], class_weight='balanced'),
                   RandomForestClassifier(criterion=properties['random-forest']['split-criterion'],
-                                         max_depth=properties['random-forest']['max-depth']),
-                  LogisticRegression(C=properties['logistic-regression']['c']),
-                  MLPClassifier(properties['mlp']['max-iter']),
-                  DecisionTreeClassifier(),
+                                         max_depth=properties['random-forest']['max-depth'],
+                                         class_weight='balanced'),
+                  LogisticRegression(C=properties['logistic-regression']['c'],
+                                     max_iter=properties['logistic-regression']['max-iter'],
+                                     class_weight='balanced'),
+                  MLPClassifier(max_iter=properties['mlp']['max-iter']),
+                  DecisionTreeClassifier(class_weight='balanced'),
                   GradientBoostingClassifier(subsample=properties['gbt']['subsample'])):
         model.fit(x_train, y_train)
         y_pred = model.predict(x_test)
