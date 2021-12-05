@@ -2,11 +2,11 @@ data:
   source-name: 960wav2vec_mean_normalized  # if you process data with a preprocessor, this name will be taken as the data output directory.
   path-extension: wav
   dataset:
-    name: RAVDESS
+    name: MELD
     batch-size: 32
-    train-size: 0.7
-    test-size: 0.2
-    val-size: 0.1
+    train-size: 1.0
+    test-size: 1.0
+    val-size: 1.0
     desired-sampling-rate: 16000
     prefetch: 2
     desired-length: null

@@ -26,11 +26,17 @@ class MeldDataset(BaseDataset):
             paths: List = self._load_all_data_paths(split_name=name)
             setattr(self, var, len(paths))
             idx = random.sample(range(getattr(self, var)), self.get_number_of_examples(name))
-            data_labels: DataLabels = DataLabels.from_paths(paths)
+            data_labels: DataLabels = DataLabels.from_paths(paths, source=name)
             if dataset == 'train_dataset' and self.resample_training_set:
-                idx = self._resample_dataset(idx, data_labels.labels, self.get_number_of_examples(name))
+                idx = self._resample_dataset(idx, data_labels.labels, getattr(self, var))
+            idx_before = idx
+            idx = self._filter_unsupported_indexes(idx, data_labels)
+            setattr(self, var, getattr(self, var) - len(set(idx_before) - set(idx)))
             setattr(self, dataset, self._build_datasets_with_x_y(self._get_items_by_indexes(paths, idx),
                                                                  self._get_items_by_indexes(data_labels.labels, idx)))
+
+    def _filter_unsupported_indexes(self, indexes: List, data_labels: DataLabels) -> List:
+        return [idx for idx in indexes if data_labels.path_details[idx].supported]
 
     def get_number_of_examples(self, set_name: str = 'all') -> int:
         if set_name == 'all':
