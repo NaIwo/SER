@@ -27,7 +27,7 @@ class PathDetails:
         self.emotional_intensity: str = splitted_name[3]
         self.statement: str = splitted_name[4]
         self.replication: str = splitted_name[5]
-        self.actor: str = splitted_name[6]
+        self.actor: int = int(splitted_name[6])
 
     @cached_property
     def stratify_label(self) -> str:

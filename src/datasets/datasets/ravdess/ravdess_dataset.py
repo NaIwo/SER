@@ -5,6 +5,7 @@ from typing import List, Iterable
 
 from src.datasets.datasets.base_dataset import BaseDataset
 from src.datasets.datasets.ravdess.data_details import DataLabels
+from src.config_reader import config
 
 
 class RavdessDataset(BaseDataset):
@@ -21,7 +22,10 @@ class RavdessDataset(BaseDataset):
 
         self.full_dataset = self._build_datasets_with_x_y(paths, data_labels.labels)
 
-        self._construct_stratify_train_test_split(paths, data_labels)
+        if config['ravdess']['split-by-actor']:
+            self._construct_datasets_having_actors(paths, data_labels)
+        else:
+            self._construct_stratify_train_test_split(paths, data_labels)
 
     def _construct_stratify_train_test_split(self, paths: List, data_labels: DataLabels) -> None:
         indexes = np.array(range(self.number_of_ds_examples))
@@ -44,6 +48,19 @@ class RavdessDataset(BaseDataset):
 
         self.val_dataset = self._build_datasets_with_x_y(self._get_items_by_indexes(paths, val_idx),
                                                          self._get_items_by_indexes(data_labels.labels, val_idx))
+
+    def _construct_datasets_having_actors(self, paths: List, data_labels: DataLabels) -> None:
+        data_type: str
+        for data_type in ['train', 'val', 'test']:
+            list_of_actors: List = config['ravdess']['actors'][data_type]
+            selected_paths: List = list()
+            selected_labels: List = list()
+            for label, path in zip(data_labels.path_details, paths):
+                if label.actor in list_of_actors:
+                    selected_labels.append(label.proper_label)
+                    selected_paths.append(path)
+            setattr(self, f'{data_type}_dataset', self._build_datasets_with_x_y(selected_paths, selected_labels))
+
 
     @staticmethod
     def _build_datasets_with_x_y(paths: List, labels: List) -> tf.data.Dataset:
