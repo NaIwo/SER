@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics import recall_score, accuracy_score
 
+from sklearn.metrics import recall_score
+
 
 def train_wav2vec(model, train_ds, val_ds, epochs, use_wav2vec=True):
     optimizer = tf.keras.optimizers.Adam()

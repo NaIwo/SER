@@ -22,11 +22,14 @@ ravdess:
 model:
   wav2vec2:
     name: Wav2vecClassifier
+    preprocessor: facebook/wav2vec2-base-960h
     pretrained-model: facebook/wav2vec2-base-960h
     save-dir: ../../results/saved_models/meld/meld_mlp_clf
-    aggregation: mean
+    aggregation: mean # {sum, mean, null}
     mode: training # {training, testing}
-    train-epochs: 35
+    train-epochs: 6
+    normalize: true
+    desired-sampling-rate: 16000
   gemaps-mfcc:
     classic:
       plot-dir: ../../results/plots
@@ -63,7 +66,10 @@ model:
       number-windows: 499
       train-epochs: 50
       mode: training
-
-
-
-
+  asr:
+    name: asr
+    tfhub: https://tfhub.dev/silero/silero-stt/en/1
+    decoder:
+      repo: snakers4/silero-models
+      model: silero_stt
+      language: en
