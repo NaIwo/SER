@@ -12,36 +12,41 @@ from src.preprocessors.preprocessor import Preprocessor
 class MfccPreprocessor(Preprocessor):
     def __init__(self, dataset: BaseDataset, target_dir: str, reduce_func: Optional[Callable] = np.mean,
                  number_of_coefficients: int = 13, window_length: float = 0.025, window_step: float = 0.01,
-                 window_function: Callable = np.hamming):
+                 window_function: Callable = np.hamming, expand_dimension: bool = False):
         super().__init__(dataset, target_dir, reduce_func)
         self.coef_number = number_of_coefficients
         self.window_length = window_length
         self.window_step = window_step
         self.window_function = window_function
+        self.expand_dimension = expand_dimension
 
     def preprocess_single_example(self, example: tf.Tensor) -> np.ndarray:
         mfccs = mfcc(example.numpy(), samplerate=self.dataset.desired_sampling_rate,
                      numcep=self.coef_number, winlen=self.window_length, winstep=self.window_step,
                      winfunc=self.window_function)
-        if self.agg is None: return mfccs
-        return self.agg(mfccs, axis=0)
+        if self.agg is not None:
+            mfccs = self.agg(mfccs, axis=0)
+        if self.expand_dimension:
+            mfccs = np.expand_dims(mfccs, axis=-1)
+        return mfccs
 
     def save_single_example(self, target_path: str, preprocessed_example: np.ndarray):
         np.save(target_path, preprocessed_example)
 
 
 def main():
-    Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
-                      total_length=config['data']['dataset']['desired-length'],
-                      padding_value=config['data']['dataset']['padding-value'],
-                      train_size=config['data']['dataset']['train-size'],
-                      test_size=config['data']['dataset']['test-size'],
-                      val_size=config['data']['dataset']['val-size'],
+    dataset_props = config['data']['dataset']
+    Dataset = get_dataset_by_name(dataset_props['name'])
+    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
+                      total_length=dataset_props['desired-length'],
+                      padding_value=dataset_props['padding-value'],
+                      train_size=dataset_props['train-size'],
+                      test_size=dataset_props['test-size'],
+                      val_size=dataset_props['val-size'],
                       data_status='raw_data',
-                      train_test_seed=config['data']['dataset']['shuffle-seed'])
-    preprocessor = MfccPreprocessor(dataset, config['data']['source-name'],
-                                    number_of_coefficients=config['model']['gemaps-mfcc']['number-coefficients'])
+                      train_test_seed=dataset_props['shuffle-seed'],
+                      resample_training_set=False)
+    preprocessor = MfccPreprocessor(dataset, config['data']['source-name'], reduce_func=None, expand_dimension=True)
     preprocessor.preprocess_data()
 
 

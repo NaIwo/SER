@@ -29,6 +29,7 @@ if __name__ == '__main__':
                       test_size=config['data']['dataset']['test-size'],
                       val_size=config['data']['dataset']['val-size'],
                       data_status='raw_data',
-                      train_test_seed=config['data']['dataset']['shuffle-seed'])
+                      train_test_seed=config['data']['dataset']['shuffle-seed'],
+                      resample_training_set=False)
     preprocessor = Wav2VecPreprocessor(dataset, config['data']['source-name'], Wav2VecModel(dataset.number_of_classes))
     preprocessor.preprocess_data()

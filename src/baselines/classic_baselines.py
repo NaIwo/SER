@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score
 from sklearn.preprocessing import StandardScaler
 from matplotlib import pyplot as plt
 import numpy as np
@@ -23,6 +23,7 @@ def print_metrics(y_true, y_pred):
     print("Class labels: ", class_labels)
     print("Confusion matrix:", confusion_matrix(y_true, y_pred), sep="\n")
     print("Classification accuracy:", accuracy_score(y_true, y_pred))
+    print("Average recall:", recall_score(y_true, y_pred, average="macro"))
 
 
 def get_correlated_features_indices(data: np.ndarray, threshold: float = 0.9) -> list:
@@ -56,17 +57,23 @@ def plot_results(results: List[float], labels: List[str], metric_name: str,
 
 
 def main():
-    Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
-                      total_length=config['data']['dataset']['desired-length'],
-                      padding_value=config['data']['dataset']['padding-value'],
-                      train_size=config['data']['dataset']['train-size'],
-                      test_size=config['data']['dataset']['test-size'],
-                      val_size=config['data']['dataset']['val-size'],
+    dataset_props = config['data']['dataset']
+    Dataset = get_dataset_by_name(dataset_props['name'])
+    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
+                      total_length=dataset_props['desired-length'],
+                      padding_value=dataset_props['padding-value'],
+                      train_size=dataset_props['train-size'],
+                      test_size=dataset_props['test-size'],
+                      val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=config['data']['dataset']['shuffle-seed'])
+                      train_test_seed=dataset_props['shuffle-seed'],
+                      resample_training_set=dataset_props['resample-training-set'])
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)
+    if len(x_train.shape) == 3:
+        x_train = x_train[:, 0]
+    if len(x_test.shape) == 3:
+        x_test = x_test[:, 0]
     correlated_features_indices = get_correlated_features_indices(x_train)
     x_train, x_test = remove_correlated_features(x_train, x_test, correlated_features_indices)
     standard_scaler = StandardScaler()
@@ -74,9 +81,19 @@ def main():
     x_train = standard_scaler.transform(x_train)
     x_test = standard_scaler.transform(x_test)
     results = []
-    labels = ["SVM", "RF", "LR", "MLP", "DT", "GBT"]
-    for model in (SVC(C=100), RandomForestClassifier(criterion='entropy', max_depth=12), LogisticRegression(C=50),
-                  MLPClassifier(max_iter=500), DecisionTreeClassifier(), GradientBoostingClassifier(subsample=0.5)):
+
+    properties = config['model']['gemaps-mfcc']['classic']
+    labels = properties['model-labels']
+    for model in (SVC(C=properties['svm']['c'], class_weight='balanced'),
+                  RandomForestClassifier(criterion=properties['random-forest']['split-criterion'],
+                                         max_depth=properties['random-forest']['max-depth'],
+                                         class_weight='balanced'),
+                  LogisticRegression(C=properties['logistic-regression']['c'],
+                                     max_iter=properties['logistic-regression']['max-iter'],
+                                     class_weight='balanced'),
+                  MLPClassifier(max_iter=properties['mlp']['max-iter']),
+                  DecisionTreeClassifier(class_weight='balanced'),
+                  GradientBoostingClassifier(subsample=properties['gbt']['subsample'])):
         model.fit(x_train, y_train)
         y_pred = model.predict(x_test)
         print_metrics(y_test, y_pred)

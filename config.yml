@@ -2,16 +2,23 @@ data:
   source-name: 960wav2vec_mean_normalized  # if you process data with a preprocessor, this name will be taken as the data output directory.
   path-extension: wav
   dataset:
-    name: MELD
+    name: RAVDESS
     batch-size: 32
-    train-size: 1.0
-    test-size: 1.0
-    val-size: 1.0
-    desired-sampling-rate: null
+    train-size: 0.7
+    test-size: 0.2
+    val-size: 0.1
+    desired-sampling-rate: 16000
     prefetch: 2
     desired-length: null
     padding-value: 0.0
     shuffle-seed: null
+    resample-training-set: False
+ravdess:
+  split-by-actor: true
+  actors:
+    train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    val: [20]
+    test: [21, 22, 23, 24]
 model:
   wav2vec2:
     name: Wav2vecClassifier
@@ -24,11 +31,41 @@ model:
     normalize: true
     desired-sampling-rate: 16000
   gemaps-mfcc:
-    plot-dir: ../../results/plots
+    classic:
+      plot-dir: ../../results/plots
+      model-labels:
+        - SVM
+        - RF
+        - LR
+        - MLP
+        - DT
+        - GBT
+      svm:
+        c: 100
+      random-forest:
+        split-criterion: entropy
+        max-depth: 12
+      logistic-regression:
+        c: 50
+        max-iter: 1000
+      mlp:
+        max-iter: 500
+      gbt:
+        subsample: 0.5
     mfcc:
-      number-coefficients: 25
+      save-dir: ../../results/saved_models/ravdess/mfcc_cnn_clf
+      batch-size: 32
+      number-coefficients: 13
+      number-windows: 499
+      train-epochs: 50
+      mode: training
     gmaps:
-      ~
+      save-dir: ../../results/saved_models/ravdess/gemaps_cnn_clf
+      batch-size: 32
+      number-coefficients: 25
+      number-windows: 499
+      train-epochs: 50
+      mode: training
   asr:
     name: asr
     tfhub: https://tfhub.dev/silero/silero-stt/en/1
