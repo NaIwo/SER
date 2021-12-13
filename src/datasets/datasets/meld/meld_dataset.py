@@ -1,7 +1,9 @@
 from typing import List, Optional, Iterable
 import tensorflow as tf
 import random
+import glob
 
+from src.config_reader import config
 from .data_details import DataLabels
 from src.datasets.datasets.base_dataset import BaseDataset
 
@@ -32,11 +34,28 @@ class MeldDataset(BaseDataset):
             idx_before = idx
             idx = self._filter_unsupported_indexes(idx, data_labels)
             setattr(self, var, getattr(self, var) - len(set(idx_before) - set(idx)))
-            setattr(self, dataset, self._build_datasets_with_x_y(self._get_items_by_indexes(paths, idx),
-                                                                 self._get_items_by_indexes(data_labels.labels, idx)))
+            dataset_paths, dataset_labels = self._get_items_by_indexes(paths, idx), \
+                                             self._get_items_by_indexes(data_labels.labels, idx)
+            setattr(self, dataset, self._build_datasets_with_x_y(dataset_paths, dataset_labels))
+            if self.use_augmented_data and name == 'train':
+                augmented_dir = self.dataset_relative_path.replace(self.data_status, config['data']['augmented-name'])
+                aug_paths = glob.glob(f"{augmented_dir}/**/*.*", recursive=True)
+                paths_from_augmentation = []
+                labels_from_augmentation = []
+                for path, label in zip(dataset_paths, dataset_labels):
+                    corresponding_paths = self._get_corresponding_paths(path, aug_paths)
+                    paths_from_augmentation += corresponding_paths
+                    labels_from_augmentation += [label] * len(corresponding_paths)
+                augmentation_set = self._build_datasets_with_x_y(paths_from_augmentation, labels_from_augmentation)
+                setattr(self, dataset, getattr(self, dataset).concatenate(augmentation_set))
 
     def _filter_unsupported_indexes(self, indexes: List, data_labels: DataLabels) -> List:
         return [idx for idx in indexes if data_labels.path_details[idx].supported]
+
+    def _get_corresponding_paths(self, path, aug_paths):
+        path_to_augmented_data = path.replace(self.data_status, config['data']['augmented-name'])
+        path_without_file_extension = path_to_augmented_data[:path_to_augmented_data.rfind('.')] + '_'
+        return [aug_path for aug_path in aug_paths if path_without_file_extension in aug_path]
 
     def get_number_of_examples(self, set_name: str = 'all') -> int:
         if set_name == 'all':

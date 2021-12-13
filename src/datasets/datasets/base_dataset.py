@@ -22,7 +22,8 @@ class BaseDataset:
                  train_test_seed: Optional[int] = None,
                  resample_training_set: bool = False,
                  crop: bool = False,
-                 number_of_windows: int = 140):
+                 number_of_windows: int = 140,
+                 use_augmented_data: bool = False):
 
         self.dataset_name: str = dataset_name
 
@@ -52,6 +53,8 @@ class BaseDataset:
 
         self.crop = crop
         self.number_of_windows = number_of_windows
+
+        self.use_augmented_data = use_augmented_data
 
     @abstractmethod
     def _construct_datasets(self) -> None:

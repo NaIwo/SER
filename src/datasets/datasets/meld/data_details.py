@@ -26,6 +26,9 @@ emotion2id = {
 class PathDetails:
     def __init__(self, path: str, source: str):
         self.file_name: str = Path(path).stem
+        split_file_name = self.file_name.split("_")
+        if len(split_file_name) == 3:  # augmented example
+            self.file_name = "_".join(split_file_name[:-1])
         self.supported: bool = True
 
         metadata = global_metadata[source]

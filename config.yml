@@ -1,5 +1,6 @@
 data:
-  source-name: 960wav2vec_mean_normalized  # if you process data with a preprocessor, this name will be taken as the data output directory.
+  source-name: mfcc_mean # if you process data with a preprocessor, this name will be taken as the data output directory.
+  augmented-name: mfcc_mean_augmented_vltp
   path-extension: wav
   dataset:
     name: MELD
@@ -13,12 +14,22 @@ data:
     padding-value: 0.0
     shuffle-seed: null
     resample-training-set: False
+    use-augmented-data: True
+
 ravdess:
-  split-by-actor: true
+  split-by-actor: false
   actors:
     train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     val: [20]
     test: [21, 22, 23, 24]
+
+augmenters:
+  vltp:
+    modification_start: 0.1
+    modification_end: 0.9
+    coverage: 1
+    frequency_threshold: 4800
+
 model:
   wav2vec2:
     name: Wav2vecClassifier
