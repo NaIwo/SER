@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import opensmile
 import tensorflow as tf
@@ -15,6 +17,8 @@ class GemapsPreprocessor(Preprocessor):
         if gemaps_level == opensmile.FeatureLevel.LowLevelDescriptors:
             self.window_size = window_length
             self.hop_size = window_step
+        if self.window_size < 0.06:
+            warnings.warn("Window lengths shorter than 0.06s except 0.02s not supported. Using 0.02s window with 0.01s step.")
         self.gemaps_extractor = opensmile.Smile(feature_set=gemaps_type, feature_level=gemaps_level, num_workers=None)
 
     def preprocess_single_example(self, example: tf.Tensor) -> np.ndarray:
@@ -29,6 +33,8 @@ class GemapsPreprocessor(Preprocessor):
     def __compute_llds(self, example: tf.Tensor):
         numpy_signal = example.numpy()
         preprocessed_signal = []
+        if self.window_size < 0.06:
+            return self.gemaps_extractor(numpy_signal, self.dataset.desired_sampling_rate)
         for window_end in np.arange(self.window_size, stop=numpy_signal.size / self.dataset.desired_sampling_rate, step=self.hop_size):
             preprocessed_signal.append(
                 self.gemaps_extractor.process_signal(numpy_signal, self.dataset.desired_sampling_rate,
@@ -51,7 +57,7 @@ def main():
                       train_test_seed=config['data']['dataset']['shuffle-seed'],
                       resample_training_set=False)
     preprocessor = GemapsPreprocessor(dataset, config['data']['source-name'], opensmile.FeatureSet.eGeMAPSv02,
-                                      opensmile.FeatureLevel.Functionals)
+                                      opensmile.FeatureLevel.LowLevelDescriptors, 0.02, 0.01)
     preprocessor.preprocess_data()
 
 
