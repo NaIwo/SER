@@ -20,9 +20,7 @@ class BaseDataset:
                  padding_value: Optional[int] = None,
                  data_status: str = 'raw_data',
                  seed: Optional[int] = None,
-                 resample_training_set: bool = False,
-                 crop: bool = False,
-                 number_of_windows: int = 140):
+                 resample_training_set: bool = False):
 
         self.dataset_name: str = dataset_name
 
@@ -49,9 +47,6 @@ class BaseDataset:
 
         self.seed: int = seed
         self.resample_training_set = resample_training_set
-
-        self.crop = crop
-        self.number_of_windows = number_of_windows
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -159,20 +154,24 @@ class BaseDataset:
         else:
             temp = tf.convert_to_tensor(audio, dtype=tf.float64)
             wav2vec_out = temp[..., :self.total_length, :]
-            wav2vec_out = tf.concat((wav2vec_out,
-                                     tf.experimental.numpy.full(
-                                         (wav2vec_out.shape[0], self.total_length - wav2vec_out.shape[1],
-                                          wav2vec_out.shape[-1]),
-                                         fill_value=self.padding_value)), axis=1)
+            if len(wav2vec_out.shape) == 3:
+                wav2vec_out = tf.concat((wav2vec_out, tf.experimental.numpy.full(
+                                             (wav2vec_out.shape[0], self.total_length - wav2vec_out.shape[1],
+                                              wav2vec_out.shape[-1]),
+                                             fill_value=self.padding_value)), axis=1)
+            else:
+                wav2vec_out = tf.concat((wav2vec_out, tf.experimental.numpy.full(
+                                             (wav2vec_out.shape[0], self.total_length - wav2vec_out.shape[1]),
+                                             fill_value=self.padding_value)), axis=1)
             return wav2vec_out, label
 
     def _load_numpy_features(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         data = np.load(bytes.decode(file_path.numpy()))[0]
         data = np.transpose(data)
-        if self.crop:
-            data = data[:self.total_length]
-        data = np.concatenate(
-            (data, np.full((self.total_length - data.shape[0], data.shape[1]), fill_value=self.padding_value)), axis=0)
+        if self.total_length is not None and self.padding_value is not None:
+            data = data[..., :self.total_length, :]
+            data = np.concatenate(
+                (data, np.full((self.total_length - data.shape[0], data.shape[1]), fill_value=self.padding_value)), axis=0)
         return tf.convert_to_tensor(data, dtype=tf.float64), label
 
     def get_numpy_dataset(self, dataset: tf.data.Dataset) -> Tuple[np.ndarray, np.ndarray]:

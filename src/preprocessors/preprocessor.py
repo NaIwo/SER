@@ -6,7 +6,7 @@ import tensorflow as tf
 from typing import Union, Callable, Optional
 
 from src.datasets import BaseDataset
-from src.config_reader import config
+from src.baselines.config_reader import config
 
 
 class Preprocessor:

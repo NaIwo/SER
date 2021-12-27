@@ -5,7 +5,7 @@ from typing import List, Iterable
 
 from src.datasets.datasets.base_dataset import BaseDataset
 from src.datasets.datasets.ravdess.data_details import DataLabels
-from src.config_reader import config
+from src.baselines.config_reader import config
 
 
 class RavdessDataset(BaseDataset):

@@ -11,7 +11,4 @@ class ConfigReader:
         return cfg
 
 
-try:
-    config = ConfigReader.read_config('../../config.yml')
-except FileNotFoundError as e:
-    config = ConfigReader.read_config('../../../config.yml')
+config = ConfigReader.read_config('config.yml')

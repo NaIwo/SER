@@ -3,7 +3,7 @@ from pathlib import Path
 
 from src.baselines.mfcc_gemaps_trainers import *
 from src.baselines.gemaps_cnn.models.gemaps_classifiers import *
-from src.config_reader import config
+from src.baselines.config_reader import config
 from src.datasets import get_dataset_by_name
 
 
@@ -25,17 +25,14 @@ def test_model(model, test_set, weights_dir, load_weights_from_file=True):
 def main():
     dataset_props = config['data']['dataset']
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
-                      total_length=dataset_props['desired-length'],
+    dataset = Dataset(total_length=dataset_props['desired-length'],
                       padding_value=dataset_props['padding-value'],
                       train_size=dataset_props['train-size'],
                       test_size=dataset_props['test-size'],
                       val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
                       seed=dataset_props['shuffle-seed'],
-                      resample_training_set=dataset_props['resample-training-set'],
-                      crop=True,
-                      number_of_windows=140)
+                      resample_training_set=dataset_props['resample-training-set'])
     model_props = config['model']['gemaps-mfcc']['gmaps']
     batch_size = model_props['batch-size']
     train_iterator = dataset.train_iterator(batch_size=batch_size)

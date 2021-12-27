@@ -4,7 +4,7 @@ from pathlib import Path
 from functools import cached_property
 import os
 
-from src.config_reader import ConfigReader
+from src.baselines.config_reader import ConfigReader
 
 T = TypeVar('T', bound='DataLabels')
 

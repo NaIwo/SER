@@ -1,5 +1,5 @@
 data:
-  source-name: 960base_wav2vec_hidden_states  # if you process data with a preprocessor, this name will be taken as the data output directory.
+  source-name: 960base_wav2vec_hidden_states
   path-extension: wav
   dataset:
     name: RAVDESS
@@ -7,7 +7,6 @@ data:
     train-size: 0.7
     test-size: 0.2
     val-size: 0.1
-    desired-sampling-rate: 48000
     prefetch: 2
     desired-length: null
     padding-value: 0.0
@@ -21,14 +20,9 @@ ravdess:
     test: [23, 24]
 model:
   wav2vec2:
-    name: Wav2vecClassifier
-    preprocessor: facebook/wav2vec2-base-960h
-    pretrained-model: facebook/wav2vec2-base-960h
     save-dir: ../../results/saved_models/meld/meld_mlp_clf
     mode: training # {training, testing}
     train-epochs: 6
-    normalize: true
-    desired-sampling-rate: 16000
   gemaps-mfcc:
     classic:
       plot-dir: ../../results/plots

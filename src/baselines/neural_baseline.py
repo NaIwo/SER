@@ -2,13 +2,13 @@ import os
 from pathlib import Path
 
 import wav2vec_neural.models as models
-from src.config_reader import config
+from src.baselines.config_reader import config
 from src.datasets import get_dataset_by_name
 
 
 def training(dataset):
     use_wav2vec = True if dataset.data_status == 'raw_data' else False
-    model = getattr(models, config['model']['wav2vec2']['name'])(num_of_classes=dataset.number_of_classes)
+    model = getattr(models, 'Wav2vecClassifier')(num_of_classes=dataset.number_of_classes)
 
     train_iterator = dataset.train_iterator(batch_size=config['data']['dataset']['batch-size'],
                                             prefetch=config['data']['dataset']['prefetch'])
@@ -31,7 +31,7 @@ def testing(dataset):
 
     use_wav2vec = True if dataset.data_status == 'raw_data' else False
 
-    model = getattr(models, config['model']['wav2vec2']['name'])(num_of_classes=dataset.number_of_classes)
+    model = getattr(models, 'Wav2vecClassifier')(num_of_classes=dataset.number_of_classes)
     model.clf.load_weights(config['model']['wav2vec2']['save-dir'])
 
     test_iterator = dataset.test_iterator(batch_size=batch_size, prefetch=config['data']['dataset']['prefetch'])
@@ -42,8 +42,7 @@ def testing(dataset):
 
 if __name__ == '__main__':
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
-                      total_length=config['data']['dataset']['desired-length'],
+    dataset = Dataset(total_length=config['data']['dataset']['desired-length'],
                       padding_value=config['data']['dataset']['padding-value'],
                       train_size=config['data']['dataset']['train-size'],
                       test_size=config['data']['dataset']['test-size'],

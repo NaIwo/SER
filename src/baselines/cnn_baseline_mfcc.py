@@ -3,7 +3,7 @@ from pathlib import Path
 
 from src.baselines.mfcc_gemaps_trainers import *
 from src.baselines.mfcc_cnn.models.mfcc_classifiers import MfccCNN
-from src.config_reader import config
+from src.baselines.config_reader import config
 from src.datasets import get_dataset_by_name
 
 

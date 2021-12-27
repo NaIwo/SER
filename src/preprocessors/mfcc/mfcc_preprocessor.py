@@ -3,7 +3,7 @@ from typing import Callable, Optional
 import numpy as np
 import tensorflow as tf
 
-from src.config_reader import config
+from src.preprocessors.config_reader import config
 from src.datasets import get_dataset_by_name
 from src.datasets import BaseDataset
 from src.preprocessors.preprocessor import Preprocessor
@@ -37,16 +37,9 @@ class MfccPreprocessor(Preprocessor):
 def main():
     dataset_props = config['data']['dataset']
     Dataset = get_dataset_by_name(dataset_props['name'])
-    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
-                      total_length=dataset_props['desired-length'],
-                      padding_value=dataset_props['padding-value'],
-                      train_size=dataset_props['train-size'],
-                      test_size=dataset_props['test-size'],
-                      val_size=dataset_props['val-size'],
-                      data_status='raw_data',
-                      train_test_seed=dataset_props['shuffle-seed'],
-                      resample_training_set=False)
-    preprocessor = MfccPreprocessor(dataset, config['data']['source-name'], reduce_func=None, expand_dimension=True)
+    dataset = Dataset(desired_sampling_rate=dataset_props['original-sampling-rate'],
+                      data_status='raw_data')
+    preprocessor = MfccPreprocessor(dataset, config['data']['out-name'], reduce_func=None, expand_dimension=True)
     preprocessor.preprocess_data()
 
 

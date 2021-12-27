@@ -32,7 +32,7 @@ huggingface-hub==0.1.0
 idna==3.3
 iso-639==0.4.5
 joblib==1.1.0
-keras==2.7.0
+keras==2.6.0
 keras-nightly==2.5.0.dev2021032900
 Keras-Preprocessing==1.1.2
 kiwisolver @ file:///tmp/build/80754af9/kiwisolver_1612282420641/work

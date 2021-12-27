@@ -12,7 +12,7 @@ import numpy as np
 import os
 from pathlib import Path
 
-from src.config_reader import config
+from src.baselines.config_reader import config
 
 from src.datasets import get_dataset_by_name
 
@@ -59,8 +59,7 @@ def plot_results(results: List[float], labels: List[str], metric_name: str,
 def main():
     dataset_props = config['data']['dataset']
     Dataset = get_dataset_by_name(dataset_props['name'])
-    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
-                      total_length=dataset_props['desired-length'],
+    dataset = Dataset(total_length=dataset_props['desired-length'],
                       padding_value=dataset_props['padding-value'],
                       train_size=dataset_props['train-size'],
                       test_size=dataset_props['test-size'],
