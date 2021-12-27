@@ -32,7 +32,7 @@ def main():
                       test_size=dataset_props['test-size'],
                       val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=dataset_props['shuffle-seed'],
+                      seed=dataset_props['shuffle-seed'],
                       resample_training_set=dataset_props['resample-training-set'],
                       crop=True,
                       number_of_windows=140)

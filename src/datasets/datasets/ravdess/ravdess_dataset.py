@@ -35,7 +35,7 @@ class RavdessDataset(BaseDataset):
             train_idx, test_idx = train_test_split(indexes,
                                                    train_size=self.get_number_of_examples('train'),
                                                    test_size=self.get_number_of_examples('test'),
-                                                   random_state=self.train_test_seed,
+                                                   random_state=self.seed,
                                                    stratify=data_labels.stratify_labels)
 
         val_idx = set(indexes) - set(train_idx) - set(test_idx)

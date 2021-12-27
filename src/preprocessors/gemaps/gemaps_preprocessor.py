@@ -10,7 +10,7 @@ from src.preprocessors.preprocessor import Preprocessor
 
 class GemapsPreprocessor(Preprocessor):
     def __init__(self, dataset: BaseDataset, target_dir: str, gemaps_type, gemaps_level,
-                 window_length: float = 0.06, window_step: float = 0.02):
+                 window_length: float = 0.025, window_step: float = 0.01):
         super().__init__(dataset, target_dir)
         if gemaps_level == opensmile.FeatureLevel.LowLevelDescriptors:
             self.window_size = window_length
@@ -51,7 +51,7 @@ def main():
                       train_test_seed=config['data']['dataset']['shuffle-seed'],
                       resample_training_set=False)
     preprocessor = GemapsPreprocessor(dataset, config['data']['source-name'], opensmile.FeatureSet.eGeMAPSv02,
-                                      opensmile.FeatureLevel.Functionals)
+                                      opensmile.FeatureLevel.LowLevelDescriptors)
     preprocessor.preprocess_data()
 
 

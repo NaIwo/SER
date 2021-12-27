@@ -35,6 +35,8 @@ class PathDetails:
 
     @cached_property
     def proper_label(self) -> int:
+        # if self.emotion != '01':
+        #     return int(self.emotion) - 2
         return int(self.emotion) - 1
 
 

@@ -66,7 +66,7 @@ def main():
                       test_size=dataset_props['test-size'],
                       val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=dataset_props['shuffle-seed'],
+                      seed=dataset_props['shuffle-seed'],
                       resample_training_set=dataset_props['resample-training-set'])
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)

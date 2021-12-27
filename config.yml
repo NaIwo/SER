@@ -1,13 +1,13 @@
 data:
-  source-name: 960wav2vec_mean_normalized  # if you process data with a preprocessor, this name will be taken as the data output directory.
+  source-name: 960base_wav2vec_hidden_states  # if you process data with a preprocessor, this name will be taken as the data output directory.
   path-extension: wav
   dataset:
-    name: MELD
+    name: RAVDESS
     batch-size: 32
-    train-size: 1.0
-    test-size: 1.0
-    val-size: 1.0
-    desired-sampling-rate: 16000
+    train-size: 0.7
+    test-size: 0.2
+    val-size: 0.1
+    desired-sampling-rate: 48000
     prefetch: 2
     desired-length: null
     padding-value: 0.0
@@ -16,16 +16,15 @@ data:
 ravdess:
   split-by-actor: true
   actors:
-    train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    val: [20]
-    test: [21, 22, 23, 24]
+    train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    val: [21, 22]
+    test: [23, 24]
 model:
   wav2vec2:
     name: Wav2vecClassifier
     preprocessor: facebook/wav2vec2-base-960h
     pretrained-model: facebook/wav2vec2-base-960h
     save-dir: ../../results/saved_models/meld/meld_mlp_clf
-    aggregation: mean # {sum, mean, null}
     mode: training # {training, testing}
     train-epochs: 6
     normalize: true

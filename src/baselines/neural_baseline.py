@@ -49,7 +49,7 @@ if __name__ == '__main__':
                       test_size=config['data']['dataset']['test-size'],
                       val_size=config['data']['dataset']['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=config['data']['dataset']['shuffle-seed'],
+                      seed=config['data']['dataset']['shuffle-seed'],
                       resample_training_set=config['data']['dataset']['resample-training-set'])
 
     if config['model']['wav2vec2']['mode'] == 'training':
