@@ -1,23 +1,23 @@
 data:
-  source-name: mfcc_mean # if you process data with a preprocessor, this name will be taken as the data output directory.
-  augmented-name: mfcc_mean_augmented_vltp
+  source-name: 960wav2vec_mean_normalized # if you process data with a preprocessor, this name will be taken as the data output directory.
+  augmented-name: raw_data_augmented_vltp
   path-extension: wav
   dataset:
     name: MELD
     batch-size: 32
-    train-size: 1.0
-    test-size: 1.0
-    val-size: 1.0
+    train-size: 0.7
+    test-size: 0.2
+    val-size: 0.1
     desired-sampling-rate: 16000
     prefetch: 2
     desired-length: null
     padding-value: 0.0
     shuffle-seed: null
     resample-training-set: False
-    use-augmented-data: True
+    use-augmented-data: False
 
 ravdess:
-  split-by-actor: false
+  split-by-actor: False
   actors:
     train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     val: [20]
@@ -63,20 +63,23 @@ model:
         max-iter: 500
       gbt:
         subsample: 0.5
+      record-experiments: True
     mfcc:
-      save-dir: ../../results/saved_models/ravdess/mfcc_cnn_clf
+      save-dir: ../../results/saved_models/meld/mfcc_cnn_clf
       batch-size: 32
       number-coefficients: 13
-      number-windows: 499
+      number-windows: 436
       train-epochs: 50
       mode: training
+      record-experiments: True
     gmaps:
-      save-dir: ../../results/saved_models/ravdess/gemaps_cnn_clf
+      save-dir: ../../results/saved_models/meld/gemaps_cnn_clf
       batch-size: 32
       number-coefficients: 25
       number-windows: 499
-      train-epochs: 50
+      train-epochs: 60
       mode: training
+      record-experiments: True
   asr:
     name: asr
     tfhub: https://tfhub.dev/silero/silero-stt/en/1
