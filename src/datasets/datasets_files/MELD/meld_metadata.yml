@@ -29225,18 +29225,6 @@ test:
     StartTime: 00:18:14,176
     Utterance: So your brother's straigh huh? Seriously.
     Utterance_ID: '6'
-  dia220_utt0:
-    Dialogue_ID: '220'
-    Emotion: disgust
-    EndTime: 00:05:39,338
-    Episode: '1'
-    Season: '2'
-    Sentiment: negative
-    Speaker: Phoebe
-    SrNo: '2177'
-    StartTime: 00:01:44,270
-    Utterance: What’s that smell?
-    Utterance_ID: '0'
   dia220_utt1:
     Dialogue_ID: '220'
     Emotion: anger
@@ -37963,18 +37951,6 @@ test:
     StartTime: 00:13:31,060
     Utterance: You bet! What’s the part?
     Utterance_ID: '3'
-  dia38_utt4:
-    Dialogue_ID: '38'
-    Emotion: joy
-    EndTime: 00:18:36,000
-    Episode: '7'
-    Season: '3'
-    Sentiment: positive
-    Speaker: Student
-    SrNo: '380'
-    StartTime: 00:13:31,060
-    Utterance: Oh it’s great, it’s a role on
-    Utterance_ID: '4'
   dia39_utt0:
     Dialogue_ID: '39'
     Emotion: neutral
