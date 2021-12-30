@@ -34,7 +34,7 @@ class GemapsPreprocessor(Preprocessor):
         numpy_signal = example.numpy()
         preprocessed_signal = []
         if self.window_size < 0.06:
-            return self.gemaps_extractor(numpy_signal, self.dataset.desired_sampling_rate)
+            return self.gemaps_extractor(numpy_signal, self.dataset.desired_sampling_rate)[0].T
         for window_end in np.arange(self.window_size, stop=numpy_signal.size / self.dataset.desired_sampling_rate, step=self.hop_size):
             preprocessed_signal.append(
                 self.gemaps_extractor.process_signal(numpy_signal, self.dataset.desired_sampling_rate,
@@ -55,7 +55,8 @@ def main():
                       val_size=config['data']['dataset']['val-size'],
                       data_status='raw_data',
                       train_test_seed=config['data']['dataset']['shuffle-seed'],
-                      resample_training_set=False)
+                      resample_training_set=False,
+                      use_augmented_data=True)
     preprocessor = GemapsPreprocessor(dataset, config['data']['source-name'], opensmile.FeatureSet.eGeMAPSv02,
                                       opensmile.FeatureLevel.LowLevelDescriptors, 0.02, 0.01)
     preprocessor.preprocess_data()
