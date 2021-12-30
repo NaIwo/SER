@@ -21,7 +21,8 @@ class VtlpAugmenter(Augmenter):
 
 
 def main():
-    Dataset = get_dataset_by_name(config['data']['dataset']['name'])
+    dataset_name = config['data']['dataset']['name']
+    Dataset = get_dataset_by_name(dataset_name)
     dataset = Dataset(desired_sampling_rate=None,  # we want native sr
                       total_length=None,
                       padding_value=None,  # we don't want any padding for augmentation
@@ -30,9 +31,12 @@ def main():
                       val_size=0.0,
                       data_status='raw_data')
     vtlp_props = config['augmenters']['vltp']
-    augmenter = VtlpAugmenter(dataset, config['data']['augmented-name'], (vtlp_props['modification_start'], vtlp_props['modification_end']),
+    augmenter = VtlpAugmenter(dataset, config["data"]["augmented-name"], (vtlp_props['modification_start'], vtlp_props['modification_end']),
                               vtlp_props['coverage'], vtlp_props['frequency_threshold'])
-    augmenter.augment_data(balance=True)
+    if dataset_name == "MELD":
+        augmenter.augment_data(balance=True)
+    elif dataset_name == "RAVDESS":
+        augmenter.augment_data()
 
 
 if __name__ == '__main__':

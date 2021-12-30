@@ -38,22 +38,25 @@ class MeldDataset(BaseDataset):
                                              self._get_items_by_indexes(data_labels.labels, idx)
             setattr(self, dataset, self._build_datasets_with_x_y(dataset_paths, dataset_labels))
             if self.use_augmented_data and name == 'train':
-                augmented_dir = self.dataset_relative_path.replace(self.data_status, config['data']['augmented-name'])
-                aug_paths = glob.glob(f"{augmented_dir}/**/*.*", recursive=True)
-                paths_from_augmentation = []
-                labels_from_augmentation = []
-                for path, label in zip(dataset_paths, dataset_labels):
-                    corresponding_paths = self._get_corresponding_paths(path, aug_paths)
-                    paths_from_augmentation += corresponding_paths
-                    labels_from_augmentation += [label] * len(corresponding_paths)
-                augmentation_set = self._build_datasets_with_x_y(paths_from_augmentation, labels_from_augmentation)
+                augmentation_set = self._get_dataset_with_augmented_data(dataset_paths, dataset_labels)
                 setattr(self, dataset, getattr(self, dataset).concatenate(augmentation_set))
+
+    def _get_dataset_with_augmented_data(self, paths: list, labels: list) -> tf.data.Dataset:
+        augmented_dir = self.dataset_relative_path.replace(self.data_status, self.data_status + '_augmented_vltp')
+        aug_paths = glob.glob(f"{augmented_dir}/**/*.*", recursive=True)
+        paths_from_augmentation = []
+        labels_from_augmentation = []
+        for path, label in zip(paths, labels):
+            corresponding_paths = self._get_corresponding_paths(path, aug_paths)
+            paths_from_augmentation += corresponding_paths
+            labels_from_augmentation += [label] * len(corresponding_paths)
+        return self._build_datasets_with_x_y(paths_from_augmentation, labels_from_augmentation)
 
     def _filter_unsupported_indexes(self, indexes: List, data_labels: DataLabels) -> List:
         return [idx for idx in indexes if data_labels.path_details[idx].supported]
 
     def _get_corresponding_paths(self, path, aug_paths):
-        path_to_augmented_data = path.replace(self.data_status, config['data']['augmented-name'])
+        path_to_augmented_data = path.replace(self.data_status, self.data_status + '_augmented_vltp')
         path_without_file_extension = path_to_augmented_data[:path_to_augmented_data.rfind('.')] + '_'
         return [aug_path for aug_path in aug_paths if path_without_file_extension in aug_path]
 

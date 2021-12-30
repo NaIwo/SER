@@ -29,7 +29,7 @@ class Augmenter:
 
             dir_to_save = os.sep.join(path_to_save.split(os.sep)[:-1])
 
-            number_of_generated_examples = class_ratios[y.numpy()]
+            number_of_generated_examples = class_ratios[y.numpy()] if balance else 1
             if number_of_generated_examples > 0:
                 augmented_examples = self.augment_example(data, number_of_generated_examples)
             else:
@@ -40,7 +40,7 @@ class Augmenter:
 
             if number_of_generated_examples == 1:
                 if balance:
-                    self.save_generated_examples(path_to_save, list(augmented_examples))
+                    self.save_generated_examples(path_to_save, [augmented_examples])
                 else:
                     self.save_generated_example(path_to_save, augmented_examples)
             elif number_of_generated_examples > 1:

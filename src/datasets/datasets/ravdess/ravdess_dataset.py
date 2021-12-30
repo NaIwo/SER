@@ -45,7 +45,7 @@ class RavdessDataset(BaseDataset):
         self.train_dataset = self._build_datasets_with_x_y(self._get_items_by_indexes(paths, train_idx),
                                                            self._get_items_by_indexes(data_labels.labels, train_idx))
         if self.use_augmented_data:
-            paths_from_augmentation = [path.replace(self.data_status, config['data']['augmented-name'])
+            paths_from_augmentation = [path.replace(self.data_status, self.data_status + '_augmented_vltp')
                                        for path in self._get_items_by_indexes(paths, train_idx)]
             augmentation_set = self._build_datasets_with_x_y(paths_from_augmentation,
                                                              self._get_items_by_indexes(data_labels.labels, train_idx))
@@ -67,8 +67,12 @@ class RavdessDataset(BaseDataset):
                 if label.actor in list_of_actors:
                     selected_labels.append(label.proper_label)
                     selected_paths.append(path)
+            if self.use_augmented_data and data_type == "train":
+                augmented_paths = [path.replace(self.data_status, self.data_status + '_augmented_vltp')
+                                   for path in selected_paths]
+                selected_paths += augmented_paths
+                selected_labels += selected_labels
             setattr(self, f'{data_type}_dataset', self._build_datasets_with_x_y(selected_paths, selected_labels))
-
 
     @staticmethod
     def _build_datasets_with_x_y(paths: List, labels: List) -> tf.data.Dataset:

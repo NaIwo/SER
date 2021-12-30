@@ -52,7 +52,7 @@ def main():
                       train_test_seed=dataset_props['shuffle-seed'],
                       resample_training_set=False,
                       use_augmented_data=True)
-    preprocessor = MfccPreprocessor(dataset, config['data']['source-name'], reduce_func=np.mean, expand_dimension=False)
+    preprocessor = MfccPreprocessor(dataset, config['data']['source-name'], reduce_func=None, expand_dimension=True)
     preprocessor.preprocess_data()
 
 

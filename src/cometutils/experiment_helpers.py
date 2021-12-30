@@ -19,6 +19,6 @@ def create_experiment(name: str, description: Optional[str] = None, **kwargs):
     return exp
 
 
-def record_metrics(exp: Experiment, metric_dict: dict, confusion_matrix: list[list], dataset):
+def record_metrics(exp: Experiment, metric_dict: dict, confusion_matrix: list[list], dataset: str):
     exp.log_metrics(metric_dict)
     exp.log_confusion_matrix(matrix=confusion_matrix, labels=LABELS[dataset])
