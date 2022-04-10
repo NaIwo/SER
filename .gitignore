@@ -4,6 +4,7 @@ venv/
 
 src/datasets/datasets_files/RAVDESS/*
 src/datasets/datasets_files/MELD/*
+src/datasets/datasets_files/JL/*
 !src/datasets/datasets_files/MELD/meld_metadata.yml
 
 results/saved_models/*

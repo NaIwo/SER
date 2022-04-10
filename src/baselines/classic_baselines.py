@@ -114,7 +114,7 @@ def main():
         if properties['record-experiments']:
             exp = Experiment(project_name='SER')
             exp.set_name(f"{dataset_props['name']} - {config['data']['source-name']} - {labels[i]}")
-            if dataset_props['name'] == 'RAVDESS':
+            if dataset_props['name'] in {'RAVDESS', 'JL'}:
                 exp.log_text(f"Train set size - {dataset_props['train-size'] * 100}%, Test set size - {dataset_props['test-size'] * 100}%")
         else:
             exp = None
