@@ -1,3 +1,4 @@
+import librosa.feature
 from python_speech_features import mfcc
 from typing import Callable, Optional
 import numpy as np
@@ -24,6 +25,10 @@ class MfccPreprocessor(Preprocessor):
         mfccs = mfcc(example.numpy(), samplerate=self.dataset.desired_sampling_rate,
                      numcep=self.coef_number, winlen=self.window_length, winstep=self.window_step,
                      winfunc=self.window_function)
+        # mfccs = librosa.feature.mfcc(example.numpy(), sr=self.dataset.desired_sampling_rate, n_mfcc=self.coef_number,
+        #                              win_length=int(self.dataset.desired_sampling_rate * self.window_length),
+        #                              hop_length=int(self.dataset.desired_sampling_rate * self.window_step),
+        #                              n_fft=512, window=self.window_function).T
         if self.agg is not None:
             mfccs = self.agg(mfccs, axis=0)
         if self.expand_dimension:
@@ -45,7 +50,8 @@ def main():
                       val_size=dataset_props['val-size'],
                       data_status='raw_data',
                       train_test_seed=dataset_props['shuffle-seed'],
-                      resample_training_set=False)
+                      resample_training_set=False,
+                      use_augmented_data=True)
     preprocessor = MfccPreprocessor(dataset, config['data']['source-name'], reduce_func=None, expand_dimension=True)
     preprocessor.preprocess_data()
 

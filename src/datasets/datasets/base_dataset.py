@@ -22,7 +22,8 @@ class BaseDataset:
                  train_test_seed: Optional[int] = None,
                  resample_training_set: bool = False,
                  crop: bool = False,
-                 number_of_windows: int = 140):
+                 number_of_windows: int = 140,
+                 use_augmented_data: bool = False):
 
         self.dataset_name: str = dataset_name
 
@@ -52,6 +53,8 @@ class BaseDataset:
 
         self.crop = crop
         self.number_of_windows = number_of_windows
+
+        self.use_augmented_data = use_augmented_data
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -99,7 +102,7 @@ class BaseDataset:
     def train_iterator(self, batch_size: int = 32, shuffle_buffer_size: int = 1024, prefetch: int = 3,
                        num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.train_dataset)
-
+        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         map_func = self.get_map_func()
         return self.train_dataset \
             .shuffle(buffer_size=shuffle_buffer_size) \
@@ -109,7 +112,7 @@ class BaseDataset:
 
     def val_iterator(self, batch_size: int = 32, prefetch: int = 3, num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.val_dataset)
-
+        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         map_func = self.get_map_func()
         return self.val_dataset \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
@@ -120,6 +123,7 @@ class BaseDataset:
         self.assert_if_dataset_is_not_none(self.test_dataset)
 
         map_func = self.get_map_func()
+        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         return self.test_dataset \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
             .batch(batch_size) \
