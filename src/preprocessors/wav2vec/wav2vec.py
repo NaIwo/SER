@@ -39,11 +39,12 @@ class Wav2VecModel:
                                      return_tensors='tf', do_normalize=self.normalize)
         wav2vec_out = tf.squeeze(wav2vec_out.input_values, axis=1)
         wav2vec_out = self.wav2vec(wav2vec_out, training=False)
-        wav2vec_out = tf.stack(wav2vec_out.hidden_states, axis=1)
+        if self.hidden_states:
+            wav2vec_out = tf.stack(wav2vec_out.hidden_states, axis=1)
         if self.max_length is not None:
             wav2vec_out = wav2vec_out[..., :self.max_length, :]
 
-        if self.aggregation is not None:
+        if self.aggregation is None:
             return wav2vec_out
         else:
             return self._get_final_results(wav2vec_out.last_hidden_state)

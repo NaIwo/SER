@@ -60,6 +60,13 @@ class DataLabels:
         return labels
 
     @cached_property
+    def actors(self):
+        actors = list()
+        for details in self.path_details:
+            actors.append(details.actor)
+        return actors
+
+    @cached_property
     def stratify_labels(self):
         stratify_labels = list()
         for details in self.path_details:

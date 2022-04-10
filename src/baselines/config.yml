@@ -1,5 +1,5 @@
 data:
-  source-name: 960base_wav2vec_hidden_states
+  source-name: 960wav2vec_sum_normalized
   path-extension: wav
   dataset:
     name: RAVDESS
@@ -20,9 +20,9 @@ ravdess:
     test: [23, 24]
 model:
   wav2vec2:
-    save-dir: ../../results/saved_models/meld/meld_mlp_clf
+    save-dir: ../../results/saved_models/ravdess/ravdess_mlp_clf
     mode: training # {training, testing}
-    train-epochs: 6
+    train-epochs: 20
   gemaps-mfcc:
     classic:
       plot-dir: ../../results/plots

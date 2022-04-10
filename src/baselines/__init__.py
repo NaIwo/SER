@@ -1,1 +1,1 @@
-from mfcc_gemaps_trainers import *
+from .mfcc_gemaps_trainers import *

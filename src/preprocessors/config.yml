@@ -1,5 +1,5 @@
 data:
-  out-name: 960base_wav2vec_hidden_states
+  out-name: 960wav2vec_sum_normalized_actor
   path-extension: wav
   dataset:
     name: RAVDESS
@@ -14,8 +14,8 @@ model:
     preprocessor: facebook/wav2vec2-base-960h
     pretrained-model: facebook/wav2vec2-base-960h
     normalize: false
-    with-hidden-states: true
-    aggregation-type: null
+    with-hidden-states: false
+    aggregation-type: mean
   mfcc:
     number-coefficients: 13
     number-windows: 499
