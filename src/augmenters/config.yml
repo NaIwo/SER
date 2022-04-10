@@ -1,0 +1,11 @@
+data:
+  augmented-name: augmented_vltp_test
+  dataset:
+    name: RAVDESS
+
+augmenters:
+  vltp:
+    modification_start: 0.1
+    modification_end: 0.9
+    coverage: 1
+    frequency_threshold: 4800

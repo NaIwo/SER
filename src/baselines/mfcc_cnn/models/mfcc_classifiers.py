@@ -14,7 +14,7 @@ class MfccCNN(tf.keras.Model):  # worked well on MFCCs / RAVDESS
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
             tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.AvgPool2D(pool_size=(249, 1)),
+            tf.keras.layers.AvgPool2D(pool_size=(num_of_coefficients // 3, 1)),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(256, activation='relu'),
             tf.keras.layers.Dropout(0.2),

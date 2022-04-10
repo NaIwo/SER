@@ -20,7 +20,10 @@ class BaseDataset:
                  padding_value: Optional[int] = None,
                  data_status: str = 'raw_data',
                  seed: Optional[int] = None,
-                 resample_training_set: bool = False):
+                 resample_training_set: bool = False,
+                 crop: bool = False,
+                 number_of_windows: int = 140,
+                 use_augmented_data: bool = False):
 
         self.dataset_name: str = dataset_name
 
@@ -47,6 +50,11 @@ class BaseDataset:
 
         self.seed: int = seed
         self.resample_training_set = resample_training_set
+
+        self.crop = crop
+        self.number_of_windows = number_of_windows
+
+        self.use_augmented_data = use_augmented_data
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -94,7 +102,7 @@ class BaseDataset:
     def train_iterator(self, batch_size: int = 32, shuffle_buffer_size: int = 1024, prefetch: int = 3,
                        num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.train_dataset)
-
+        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         map_func = self.get_map_func()
         tf.random.set_seed(self.seed)
         return self.train_dataset \
@@ -105,7 +113,7 @@ class BaseDataset:
 
     def val_iterator(self, batch_size: int = 32, prefetch: int = 3, num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.val_dataset)
-
+        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         map_func = self.get_map_func()
         return self.val_dataset \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
@@ -116,6 +124,7 @@ class BaseDataset:
         self.assert_if_dataset_is_not_none(self.test_dataset)
 
         map_func = self.get_map_func()
+        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         return self.test_dataset \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
             .batch(batch_size) \
@@ -166,9 +175,12 @@ class BaseDataset:
             return wav2vec_out, label
 
     def _load_numpy_features(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
-        data = np.load(bytes.decode(file_path.numpy()))[0]
-        data = np.transpose(data)
-        if self.total_length is not None and self.padding_value is not None:
+        data = np.load(bytes.decode(file_path.numpy()))
+        if self.crop:
+            data = data[:self.number_of_windows]
+        elif self.total_length is not None and self.padding_value is not None:
+            data = data[0]
+            data = np.transpose(data)
             data = data[..., :self.total_length, :]
             data = np.concatenate(
                 (data, np.full((self.total_length - data.shape[0], data.shape[1]), fill_value=self.padding_value)), axis=0)

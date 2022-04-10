@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import opensmile
 import tensorflow as tf
@@ -10,11 +12,13 @@ from src.preprocessors.preprocessor import Preprocessor
 
 class GemapsPreprocessor(Preprocessor):
     def __init__(self, dataset: BaseDataset, target_dir: str, gemaps_type, gemaps_level,
-                 window_length: float = 0.025, window_step: float = 0.01):
+                 window_length: float = 0.06, window_step: float = 0.02):
         super().__init__(dataset, target_dir)
         if gemaps_level == opensmile.FeatureLevel.LowLevelDescriptors:
             self.window_size = window_length
             self.hop_size = window_step
+        if self.window_size < 0.06:
+            warnings.warn("Window lengths shorter than 0.06s except 0.02s not supported. Using 0.02s window with 0.01s step.")
         self.gemaps_extractor = opensmile.Smile(feature_set=gemaps_type, feature_level=gemaps_level, num_workers=None)
 
     def preprocess_single_example(self, example: tf.Tensor) -> np.ndarray:
@@ -29,6 +33,8 @@ class GemapsPreprocessor(Preprocessor):
     def __compute_llds(self, example: tf.Tensor):
         numpy_signal = example.numpy()
         preprocessed_signal = []
+        if self.window_size < 0.06:
+            return self.gemaps_extractor(numpy_signal, self.dataset.desired_sampling_rate)[0].T
         for window_end in np.arange(self.window_size, stop=numpy_signal.size / self.dataset.desired_sampling_rate, step=self.hop_size):
             preprocessed_signal.append(
                 self.gemaps_extractor.process_signal(numpy_signal, self.dataset.desired_sampling_rate,
@@ -42,9 +48,10 @@ class GemapsPreprocessor(Preprocessor):
 def main():
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
     dataset = Dataset(desired_sampling_rate=config['data']['dataset']['original-sampling-rate'],
-                      data_status='raw_data')
+                      data_status='raw_data',
+                      use_augmented_data=config['data']['dataset']['use-augmented-data'])
     preprocessor = GemapsPreprocessor(dataset, config['data']['out-name'], opensmile.FeatureSet.eGeMAPSv02,
-                                      opensmile.FeatureLevel.LowLevelDescriptors)
+                                      opensmile.FeatureLevel.LowLevelDescriptors, 0.02, 0.01)
     preprocessor.preprocess_data()
 
 

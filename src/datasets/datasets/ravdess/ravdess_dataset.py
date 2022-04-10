@@ -31,6 +31,8 @@ class RavdessDataset(BaseDataset):
         indexes = np.array(range(self.number_of_ds_examples))
         if self.get_number_of_examples('train') == 0:  # sklearn can't cope with splitting to empty set
             train_idx, test_idx = [], list(range(self.get_number_of_examples('test')))
+        elif self.get_number_of_examples('test') == 0:
+            train_idx, test_idx = list(range(self.get_number_of_examples('train'))), []
         else:
             train_idx, test_idx = train_test_split(indexes,
                                                    train_size=self.get_number_of_examples('train'),
@@ -42,6 +44,12 @@ class RavdessDataset(BaseDataset):
 
         self.train_dataset = self._build_datasets_with_x_y(self._get_items_by_indexes(paths, train_idx),
                                                            self._get_items_by_indexes(self.data_labels.labels, train_idx))
+        if self.use_augmented_data:
+            paths_from_augmentation = [path.replace(self.data_status, self.data_status + '_augmented_vltp')
+                                       for path in self._get_items_by_indexes(paths, train_idx)]
+            augmentation_set = self._build_datasets_with_x_y(paths_from_augmentation,
+                                                             self._get_items_by_indexes(self.data_labels.labels, train_idx))
+            self.train_dataset = self.train_dataset.concatenate(augmentation_set)
 
         self.test_dataset = self._build_datasets_with_x_y(self._get_items_by_indexes(paths, test_idx),
                                                           self._get_items_by_indexes(self.data_labels.labels, test_idx))
@@ -59,6 +67,11 @@ class RavdessDataset(BaseDataset):
                 if label.actor in list_of_actors:
                     selected_labels.append(label.proper_label)
                     selected_paths.append(path)
+            if self.use_augmented_data and data_type == "train":
+                augmented_paths = [path.replace(self.data_status, self.data_status + '_augmented_vltp')
+                                   for path in selected_paths]
+                selected_paths += augmented_paths
+                selected_labels += selected_labels
             setattr(self, f'{data_type}_dataset', self._build_datasets_with_x_y(selected_paths, selected_labels))
 
     @staticmethod

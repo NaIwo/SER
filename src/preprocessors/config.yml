@@ -8,6 +8,7 @@ data:
     prefetch: 2
     max-length: null
     padding-value: 0.0
+    use-augmented-data: False
 model:
   wav2vec2:
     name: Wav2vecClassifier

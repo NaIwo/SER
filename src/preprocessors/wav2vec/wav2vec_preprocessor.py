@@ -23,6 +23,7 @@ class Wav2VecPreprocessor(Preprocessor):
 if __name__ == '__main__':
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
     dataset = Dataset(desired_sampling_rate=config['data']['dataset']['original-sampling-rate'],
-                      data_status='raw_data')
+                      data_status='raw_data',
+                      use_augmented_data=config['data']['dataset']['use-augmented-data'])
     preprocessor = Wav2VecPreprocessor(dataset, config['data']['out-name'], Wav2VecModel(dataset.number_of_classes))
     preprocessor.preprocess_data()
