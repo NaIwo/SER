@@ -19,7 +19,7 @@ class Normalizer(Preprocessor):
             'This only applies to Ravdess Dataset! If you want to use it on different dataset, provide new implementation.')
 
     def _load_audio(self, path, y):
-        return self.dataset._load_audio_wav2vec(path, y)
+        return self.dataset.get_audio_func()(path, y)
 
     def preprocess_data(self) -> None:
         actors: List = self.dataset.data_labels.actors
@@ -38,7 +38,7 @@ class Normalizer(Preprocessor):
                 path = actors_data[actor]['path'][idx]
 
                 raw_path_string = bytes.decode(path.numpy())
-                raw_path_string = raw_path_string.replace('960wav2vec_sum_normalized', self.target_directory)
+                raw_path_string = raw_path_string.replace(self.dataset.data_status, self.target_directory)
 
                 path_to_save = raw_path_string.replace(f'.{config["data"]["path-extension"]}', '')
                 dir_to_save = os.sep.join(path_to_save.split(os.sep)[:-1])
@@ -54,7 +54,7 @@ class Normalizer(Preprocessor):
 
 if __name__ == '__main__':
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(data_status='960wav2vec_sum_normalized',
+    dataset = Dataset(data_status='mfcc',
                       total_length=None,
                       padding_value=0.0,
                       resample_training_set=False
