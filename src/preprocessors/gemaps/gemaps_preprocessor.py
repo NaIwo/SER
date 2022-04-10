@@ -4,7 +4,7 @@ import numpy as np
 import opensmile
 import tensorflow as tf
 
-from src.config_reader import config
+from src.preprocessors.config_reader import config
 from src.datasets import get_dataset_by_name
 from src.datasets import BaseDataset
 from src.preprocessors.preprocessor import Preprocessor
@@ -47,17 +47,10 @@ class GemapsPreprocessor(Preprocessor):
 
 def main():
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['desired-sampling-rate'],
-                      total_length=config['data']['dataset']['desired-length'],
-                      padding_value=config['data']['dataset']['padding-value'],
-                      train_size=config['data']['dataset']['train-size'],
-                      test_size=config['data']['dataset']['test-size'],
-                      val_size=config['data']['dataset']['val-size'],
+    dataset = Dataset(desired_sampling_rate=config['data']['dataset']['original-sampling-rate'],
                       data_status='raw_data',
-                      train_test_seed=config['data']['dataset']['shuffle-seed'],
-                      resample_training_set=False,
-                      use_augmented_data=True)
-    preprocessor = GemapsPreprocessor(dataset, config['data']['source-name'], opensmile.FeatureSet.eGeMAPSv02,
+                      use_augmented_data=config['data']['dataset']['use-augmented-data'])
+    preprocessor = GemapsPreprocessor(dataset, config['data']['out-name'], opensmile.FeatureSet.eGeMAPSv02,
                                       opensmile.FeatureLevel.LowLevelDescriptors, 0.02, 0.01)
     preprocessor.preprocess_data()
 

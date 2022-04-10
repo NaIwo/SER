@@ -5,8 +5,8 @@ from comet_ml import Experiment
 
 from src.baselines.mfcc_gemaps_trainers import *
 from src.baselines.gemaps_cnn.models.gemaps_classifiers import *
+from src.baselines.config_reader import config
 from src.cometutils.experiment_helpers import *
-from src.config_reader import config
 from src.datasets import get_dataset_by_name
 
 
@@ -35,14 +35,13 @@ def main():
         exp = None
 
     Dataset = get_dataset_by_name(config['data']['dataset']['name'])
-    dataset = Dataset(desired_sampling_rate=dataset_props['desired-sampling-rate'],
-                      total_length=dataset_props['desired-length'],
+    dataset = Dataset(total_length=dataset_props['desired-length'],
                       padding_value=dataset_props['padding-value'],
                       train_size=dataset_props['train-size'],
                       test_size=dataset_props['test-size'],
                       val_size=dataset_props['val-size'],
                       data_status=config['data']['source-name'],
-                      train_test_seed=dataset_props['shuffle-seed'],
+                      seed=dataset_props['shuffle-seed'],
                       resample_training_set=dataset_props['resample-training-set'],
                       use_augmented_data=dataset_props['use-augmented-data'])
     model_props = config['model']['gemaps-mfcc']['gmaps']

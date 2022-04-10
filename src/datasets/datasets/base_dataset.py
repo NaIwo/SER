@@ -19,7 +19,7 @@ class BaseDataset:
                  total_length: Optional[int] = None,
                  padding_value: Optional[int] = None,
                  data_status: str = 'raw_data',
-                 train_test_seed: Optional[int] = None,
+                 seed: Optional[int] = None,
                  resample_training_set: bool = False,
                  crop: bool = False,
                  number_of_windows: int = 140,
@@ -48,7 +48,7 @@ class BaseDataset:
         self.val_dataset: Optional[tf.data.Dataset] = None  # has to be initialized
         self.test_dataset: Optional[tf.data.Dataset] = None  # has to be initialized
 
-        self.train_test_seed: int = train_test_seed
+        self.seed: int = seed
         self.resample_training_set = resample_training_set
 
         self.crop = crop
@@ -64,7 +64,7 @@ class BaseDataset:
         self.assert_if_dataset_is_not_none(self.full_dataset)
 
         full_dataset: tf.data.Dataset = self.full_dataset.shuffle(1000, reshuffle_each_iteration=False,
-                                                                  seed=self.train_test_seed)
+                                                                  seed=self.seed)
         self.train_dataset = full_dataset.take(self.get_number_of_examples('train'))
         self.test_dataset = full_dataset.skip(self.get_number_of_examples('train')).take(
             self.get_number_of_examples('test'))
@@ -104,6 +104,7 @@ class BaseDataset:
         self.assert_if_dataset_is_not_none(self.train_dataset)
         #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         map_func = self.get_map_func()
+        tf.random.set_seed(self.seed)
         return self.train_dataset \
             .shuffle(buffer_size=shuffle_buffer_size) \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
@@ -155,15 +156,34 @@ class BaseDataset:
                                constant_values=self.padding_value)
             return tf.convert_to_tensor(audio, dtype=tf.float64), label
 
-    @staticmethod
-    def _load_audio_wav2vec(file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+    def _load_audio_wav2vec(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         audio = np.load(bytes.decode(file_path.numpy()))[0]
-        return tf.convert_to_tensor(audio, dtype=tf.float64), label
+        if self.padding_value is None or self.total_length is None:
+            return tf.convert_to_tensor(audio, dtype=tf.float64), label
+        else:
+            temp = tf.convert_to_tensor(audio, dtype=tf.float64)
+            wav2vec_out = temp[..., :self.total_length, :]
+            if len(wav2vec_out.shape) == 3:
+                wav2vec_out = tf.concat((wav2vec_out, tf.experimental.numpy.full(
+                                             (wav2vec_out.shape[0], self.total_length - wav2vec_out.shape[1],
+                                              wav2vec_out.shape[-1]),
+                                             fill_value=self.padding_value)), axis=1)
+            else:
+                wav2vec_out = tf.concat((wav2vec_out, tf.experimental.numpy.full(
+                                             (wav2vec_out.shape[0], self.total_length - wav2vec_out.shape[1]),
+                                             fill_value=self.padding_value)), axis=1)
+            return wav2vec_out, label
 
     def _load_numpy_features(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         data = np.load(bytes.decode(file_path.numpy()))
         if self.crop:
             data = data[:self.number_of_windows]
+        elif self.total_length is not None and self.padding_value is not None:
+            data = data[0]
+            data = np.transpose(data)
+            data = data[..., :self.total_length, :]
+            data = np.concatenate(
+                (data, np.full((self.total_length - data.shape[0], data.shape[1]), fill_value=self.padding_value)), axis=0)
         return tf.convert_to_tensor(data, dtype=tf.float64), label
 
     def get_numpy_dataset(self, dataset: tf.data.Dataset) -> Tuple[np.ndarray, np.ndarray]:

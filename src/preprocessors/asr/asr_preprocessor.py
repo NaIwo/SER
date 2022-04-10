@@ -1,8 +1,7 @@
 import tensorflow as tf
 import torch
-import numpy as np
 
-from src.config_reader import config
+from src.baselines.config_reader import config
 from src.datasets import BaseDataset, get_dataset_by_name
 from src.preprocessors.preprocessor import Preprocessor
 from src.preprocessors.asr.model import ModelLoader

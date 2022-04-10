@@ -1,0 +1,32 @@
+data:
+  out-name: gemaps_test
+  path-extension: wav
+  dataset:
+    name: RAVDESS
+    original-sampling-rate: 48000
+    desired-sampling-rate: 16000
+    prefetch: 2
+    max-length: null
+    padding-value: 0.0
+    use-augmented-data: False
+model:
+  wav2vec2:
+    name: Wav2vecClassifier
+    preprocessor: facebook/wav2vec2-base-960h
+    pretrained-model: facebook/wav2vec2-base-960h
+    normalize: false
+    with-hidden-states: true
+    aggregation-type: null
+  mfcc:
+    number-coefficients: 13
+    number-windows: 499
+  gmaps:
+    number-coefficients: 25
+    number-windows: 499
+  asr:
+    name: asr
+    tfhub: https://tfhub.dev/silero/silero-stt/en/1
+    decoder:
+      repo: snakers4/silero-models
+      model: silero_stt
+      language: en

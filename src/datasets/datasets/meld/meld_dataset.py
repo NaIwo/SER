@@ -3,7 +3,7 @@ import tensorflow as tf
 import random
 import glob
 
-from src.config_reader import config
+from src.baselines.config_reader import config
 from .data_details import DataLabels
 from src.datasets.datasets.base_dataset import BaseDataset
 

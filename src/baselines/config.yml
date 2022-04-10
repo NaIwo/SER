@@ -1,14 +1,13 @@
 data:
-  source-name: 960wav2vec_mean_normalized # if you process data with a preprocessor, this name will be taken as the data output directory.
-  augmented-name: raw_data_augmented_vltp
+  source-name: mfcc_mean
+  augmented-name: ''
   path-extension: wav
   dataset:
-    name: MELD
+    name: RAVDESS
     batch-size: 32
     train-size: 0.7
     test-size: 0.2
     val-size: 0.1
-    desired-sampling-rate: 16000
     prefetch: 2
     desired-length: null
     padding-value: 0.0
@@ -17,30 +16,17 @@ data:
     use-augmented-data: False
 
 ravdess:
-  split-by-actor: False
+  split-by-actor: false
   actors:
-    train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    val: [20]
-    test: [21, 22, 23, 24]
-
-augmenters:
-  vltp:
-    modification_start: 0.1
-    modification_end: 0.9
-    coverage: 1
-    frequency_threshold: 4800
+    train: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    val: [21, 22]
+    test: [23, 24]
 
 model:
   wav2vec2:
-    name: Wav2vecClassifier
-    preprocessor: facebook/wav2vec2-base-960h
-    pretrained-model: facebook/wav2vec2-base-960h
     save-dir: ../../results/saved_models/meld/meld_mlp_clf
-    aggregation: mean # {sum, mean, null}
     mode: training # {training, testing}
     train-epochs: 6
-    normalize: true
-    desired-sampling-rate: 16000
   gemaps-mfcc:
     classic:
       plot-dir: ../../results/plots
@@ -63,23 +49,23 @@ model:
         max-iter: 500
       gbt:
         subsample: 0.5
-      record-experiments: True
+      record-experiments: False
     mfcc:
-      save-dir: ../../results/saved_models/meld/mfcc_cnn_clf
+      save-dir: ../../results/saved_models/ravdess/mfcc_cnn_clf
       batch-size: 32
       number-coefficients: 13
-      number-windows: 436
+      number-windows: 499
       train-epochs: 50
       mode: training
-      record-experiments: True
+      record-experiments: False
     gmaps:
-      save-dir: ../../results/saved_models/meld/gemaps_cnn_clf
+      save-dir: ../../results/saved_models/ravdess/gemaps_cnn_clf
       batch-size: 32
       number-coefficients: 25
       number-windows: 499
       train-epochs: 60
       mode: training
-      record-experiments: True
+      record-experiments: False
   asr:
     name: asr
     tfhub: https://tfhub.dev/silero/silero-stt/en/1

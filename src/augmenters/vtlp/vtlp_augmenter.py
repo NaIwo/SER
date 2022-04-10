@@ -5,7 +5,7 @@ from typing import Tuple, Union, List
 from nlpaug.augmenter.audio import vtlp
 
 from src.augmenters.augmenter import Augmenter
-from src.config_reader import config
+from src.augmenters.config_reader import config
 from src.datasets import BaseDataset, get_dataset_by_name
 
 
