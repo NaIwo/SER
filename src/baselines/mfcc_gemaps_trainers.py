@@ -14,16 +14,17 @@ def train(model: tf.keras.Model, train_ds: tf.data.Dataset, val_ds: tf.data.Data
             loss = tf.keras.losses.sparse_categorical_crossentropy(y, y_pred)
         grads = tape.gradient(loss, model.trainable_weights)
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
-        return loss
+        return tf.reduce_mean(loss)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
     val_losses = list()
     for epoch in range(epochs):
+        train_losses = list()
         for step, (x, y) in enumerate(train_ds):
-            loss_value = train_step(x, y)
-            print(f"\rEpoch {epoch + 1}/{epochs}, Step {step}, Loss {np.mean(loss_value)}", end='', flush=True)
+            train_losses.append(train_step(x, y))
+            print(f"\rEpoch {epoch + 1}/{epochs}, Step {step}, Loss {np.mean(train_losses)}", end='', flush=True)
         print()
-        val_loss = test(model, val_ds)
+        val_loss, _, _ = test(model, val_ds)
         val_losses.append(np.mean(val_loss))
 
     return model

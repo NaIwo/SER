@@ -119,8 +119,8 @@ def main():
             exp = None
         model.fit(x_train, y_train)
         print(labels[i])
-        y_pred = model.predict(x_train)
-        print_metrics(y_train, y_pred, "Train dataset", exp)
+        # y_pred = model.predict(x_train)
+        # print_metrics(y_train, y_pred, "Train dataset", exp)
         y_pred = model.predict(x_test)
         print_metrics(y_test, y_pred, "Test dataset", exp)
         results.append(accuracy_score(y_test, y_pred))

@@ -32,8 +32,15 @@ class Normalizer(Preprocessor):
             actors_data[actor]['data'].append(data.numpy())
 
         for actor in actors_data.keys():
-            data = np.array(actors_data[actor]['data'])
-            data = (data - np.mean(data, axis=0)) / (np.std(data, axis=0) + 1e-10)
+            with tf.device('/CPU:0'):
+                data = tf.ragged.stack(actors_data[actor]['data']).to_tensor(np.nan).numpy()
+            single_sample_shape = data.shape[1:]
+            data = data.squeeze()
+            if (dim_number := len(data.shape)) <= 3:
+                data = (data - np.nanmean(data, (tuple(range(dim_number - 1))))) \
+                        / (np.nanstd(data, tuple(range(dim_number - 1))) + 1e-10)
+            else:
+                raise Exception("Arrays of dimension higher than 3 are not supported")
             for idx, features in enumerate(data):
                 path = actors_data[actor]['path'][idx]
 
@@ -46,7 +53,11 @@ class Normalizer(Preprocessor):
                 if not (os.path.exists(dir_to_save)):
                     Path(dir_to_save).mkdir(parents=True, exist_ok=True)
 
-                self.save_single_example(path_to_save, features[np.newaxis, ...])
+                features = features[~np.isnan(features).all(axis=-1)]
+                for axis in (0, -1):  # additional dim can be leading or trailing only
+                    if single_sample_shape[axis] == 1:
+                        features = np.expand_dims(features, axis=axis)
+                self.save_single_example(path_to_save, features)
 
     def save_single_example(self, target_path: str, preprocessed_example: tf.Tensor):
         np.save(target_path, preprocessed_example)
