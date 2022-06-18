@@ -8,7 +8,7 @@ from src.datasets import get_dataset_by_name
 
 def training(dataset):
     use_wav2vec = True if dataset.data_status == 'raw_data' else False
-    model = getattr(models, 'Wav2vecClassifier')(num_of_classes=dataset.number_of_classes)
+    model = getattr(models, 'Wav2vecNormalize')(num_of_classes=dataset.number_of_classes)
 
     train_iterator = dataset.train_iterator(batch_size=config['data']['dataset']['batch-size'],
                                             prefetch=config['data']['dataset']['prefetch'])
@@ -31,7 +31,7 @@ def testing(dataset):
 
     use_wav2vec = True if dataset.data_status == 'raw_data' else False
 
-    model = getattr(models, 'Wav2vecClassifier')(num_of_classes=dataset.number_of_classes)
+    model = getattr(models, 'Wav2vecNormalize')(num_of_classes=dataset.number_of_classes)
     model.clf.load_weights(config['model']['wav2vec2']['save-dir'])
 
     test_iterator = dataset.test_iterator(batch_size=batch_size, prefetch=config['data']['dataset']['prefetch'])

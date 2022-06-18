@@ -1,5 +1,5 @@
 data:
-  source-name: 960wav2vec_sum_normalized
+  source-name: 960wav2vec_mean_normalized
   path-extension: wav
   dataset:
     name: RAVDESS
@@ -25,7 +25,7 @@ model:
   wav2vec2:
     save-dir: ../../results/saved_models/ravdess/ravdess_mlp_clf
     mode: training # {training, testing}
-    train-epochs: 20
+    train-epochs: 35
   gemaps-mfcc:
     classic:
       plot-dir: ../../results/plots
