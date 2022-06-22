@@ -13,6 +13,7 @@ data:
     shuffle-seed: null
     resample-training-set: False
     use-augmented-data: False
+    keep-actor-data: False
 
 ravdess:
   split-by-actor: true
@@ -61,7 +62,6 @@ model:
       save-dir: ../../results/saved_models/ravdess/gemaps_cnn_clf
       batch-size: 32
       number-coefficients: 25
-      number-windows: 499
       train-epochs: 60
       mode: training
       record-experiments: False

@@ -6,7 +6,7 @@ import numpy as np
 import librosa
 from pathlib import Path
 import warnings
-from typing import Optional, List, Callable, Tuple
+from typing import Optional, List, Callable, Tuple, Union
 
 
 class BaseDataset:
@@ -23,7 +23,8 @@ class BaseDataset:
                  resample_training_set: bool = False,
                  crop: bool = False,
                  number_of_windows: int = 140,
-                 use_augmented_data: bool = False):
+                 use_augmented_data: bool = False,
+                 keep_actor_data: bool = False):
 
         self.dataset_name: str = dataset_name
 
@@ -55,6 +56,7 @@ class BaseDataset:
         self.number_of_windows = number_of_windows
 
         self.use_augmented_data = use_augmented_data
+        self.keep_actor_data = keep_actor_data
 
     @abstractmethod
     def _construct_datasets(self) -> None:
@@ -102,36 +104,42 @@ class BaseDataset:
     def train_iterator(self, batch_size: int = 32, shuffle_buffer_size: int = 1024, prefetch: int = 3,
                        num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.train_dataset)
-        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
         map_func = self.get_map_func()
         tf.random.set_seed(self.seed)
+        if self.keep_actor_data:
+            dataset_shape = (tf.TensorShape([None, 25]), tf.TensorShape([]), tf.TensorShape([2, 25]))
+        else:
+            dataset_shape = (tf.TensorShape([None, 25]), tf.TensorShape([]))
         return self.train_dataset \
             .shuffle(buffer_size=shuffle_buffer_size) \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
-            .batch(batch_size) \
+            .padded_batch(batch_size, dataset_shape) \
             .prefetch(prefetch)
 
     def val_iterator(self, batch_size: int = 32, prefetch: int = 3, num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.val_dataset)
-        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
-        map_func = self.get_map_func()
-        return self.val_dataset \
-            .map(map_func, num_parallel_calls=num_parallel_calls) \
-            .batch(batch_size) \
-            .prefetch(prefetch)
+        return self._get_evaluation_set_iterator(self.val_dataset, batch_size, prefetch, num_parallel_calls)
 
     def test_iterator(self, batch_size: int = 32, prefetch: int = 3, num_parallel_calls: int = -1) -> tf.data.Dataset:
         self.assert_if_dataset_is_not_none(self.test_dataset)
+        return self._get_evaluation_set_iterator(self.test_dataset, batch_size, prefetch, num_parallel_calls)
 
+    def _get_evaluation_set_iterator(self, dataset: tf.data.Dataset, batch_size: int = 32,
+                                     prefetch: int = 3, num_parallel_calls: int = -1) -> tf.data.Dataset:
         map_func = self.get_map_func()
-        #  .padded_batch(batch_size, (tf.TensorShape([None, 25]), tf.TensorShape([]))) \
-        return self.test_dataset \
+        if self.keep_actor_data:
+            dataset_shape = (tf.TensorShape([None, 25]), tf.TensorShape([]), tf.TensorShape([2, 25]))
+        else:
+            dataset_shape = (tf.TensorShape([None, 25]), tf.TensorShape([]))
+        return dataset \
             .map(map_func, num_parallel_calls=num_parallel_calls) \
-            .batch(batch_size) \
+            .padded_batch(batch_size, dataset_shape) \
             .prefetch(prefetch)
 
     def get_map_func(self) -> Callable:
         audio_func = self.get_audio_func()
+        if self.keep_actor_data:
+            return lambda *items: tf.py_function(func=audio_func, inp=items, Tout=[tf.float64, tf.int32, tf.float64])
         return lambda *items: tf.py_function(func=audio_func, inp=items, Tout=[tf.float64, tf.int32])
 
     def get_audio_func(self) -> Callable:
@@ -174,7 +182,8 @@ class BaseDataset:
                                              fill_value=self.padding_value)), axis=1)
             return wav2vec_out, label
 
-    def _load_numpy_features(self, file_path: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+    def _load_numpy_features(self, file_path: tf.Tensor, label: tf.Tensor, k: tf.Tensor = tf.constant([1.], dtype=tf.float64))\
+            -> Union[Tuple[tf.Tensor, tf.Tensor], Tuple[tf.Tensor, tf.Tensor, tf.Tensor]]:
         data = np.load(bytes.decode(file_path.numpy()))
         if self.crop:
             data = data[:self.number_of_windows]
@@ -184,13 +193,37 @@ class BaseDataset:
             data = data[..., :self.total_length, :]
             data = np.concatenate(
                 (data, np.full((self.total_length - data.shape[0], data.shape[1]), fill_value=self.padding_value)), axis=0)
+        if self.keep_actor_data:
+            return tf.convert_to_tensor(data, dtype=tf.float64), label, k
         return tf.convert_to_tensor(data, dtype=tf.float64), label
 
-    def get_numpy_dataset(self, dataset: tf.data.Dataset) -> Tuple[np.ndarray, np.ndarray]:
+    def get_numpy_dataset(self, dataset: tf.data.Dataset) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, Tuple]]:
         self.assert_if_dataset_is_not_none(dataset)
 
         numpy_dataset = np.array(list(dataset.map(self.get_map_func()).as_numpy_iterator()), dtype=object)
+        if self.keep_actor_data:
+            return np.stack(numpy_dataset[:, 0]).squeeze(), \
+                   (np.stack(numpy_dataset[:, 1])[:, 0].astype("int32").squeeze(),
+                        np.stack(numpy_dataset[:, 1])[:, 1].astype("int32").squeeze())
         return np.stack(numpy_dataset[:, 0]).squeeze(), numpy_dataset[:, 1].astype("int32").squeeze()
+
+    def create_dataset_with_statistics(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
+        numpy_dataset = np.array(list(dataset.map(self.get_map_func()).as_numpy_iterator()), dtype=object)
+        stats = self.compute_ground_truth_per_actor_mean_and_std(numpy_dataset[:, 0],
+                                                       np.stack(numpy_dataset[:, 1])[:, 1].astype("int32").squeeze())
+        means_stds_list = [stats[actor_label] for actor_label in np.stack(numpy_dataset[:, 1])[:, 1]]
+        means_stds_dataset = tf.data.Dataset.from_tensor_slices(means_stds_list)
+        return tf.data.Dataset.zip((dataset.map(lambda x, y: x),
+                                    dataset.map(lambda a, b: b[0]), means_stds_dataset))
+
+    @staticmethod
+    def compute_ground_truth_per_actor_mean_and_std(data: np.ndarray, actor_labels: np.ndarray) -> dict:
+        result = dict.fromkeys(set(actor_labels))
+        for actor_label in set(actor_labels):
+            actor_data = [sample for sample, actor_id in zip(data, actor_labels) if actor_id == actor_label]
+            concatenated_actor_data = np.concatenate(actor_data, axis=0)
+            result[actor_label] = np.mean(concatenated_actor_data, axis=0), np.std(concatenated_actor_data, axis=0)
+        return result
 
     @staticmethod
     def assert_if_dataset_is_not_none(dataset: tf.data.Dataset) -> None:

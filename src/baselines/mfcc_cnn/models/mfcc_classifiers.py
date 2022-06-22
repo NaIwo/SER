@@ -21,7 +21,7 @@ class MfccCNN(tf.keras.Model):  # worked well on MFCCs / RAVDESS
             tf.keras.layers.Dense(64, activation='relu'),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(num_of_classes, activation='softmax')
-        ])
+        ], name="MFCC-Conv2D-network")
 
     def call(self, inputs, training=None, mask=None):
         return self.clf(inputs, training=training)

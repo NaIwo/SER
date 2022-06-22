@@ -82,10 +82,13 @@ def main():
                       data_status=config['data']['source-name'],
                       seed=dataset_props['shuffle-seed'],
                       resample_training_set=dataset_props['resample-training-set'],
-                      use_augmented_data=dataset_props['use-augmented-data'])
+                      use_augmented_data=dataset_props['use-augmented-data'],
+                      keep_actor_data=dataset_props['keep-actor-data'])
 
     x_train, y_train = dataset.get_numpy_dataset(dataset.train_dataset)
     x_test, y_test = dataset.get_numpy_dataset(dataset.test_dataset)
+    if dataset.keep_actor_data:
+        y_train, y_test = y_train[0], y_test[0]
     if len(x_train.shape) == 3:
         x_train = x_train[:, 0]
     if len(x_test.shape) == 3:
@@ -119,8 +122,8 @@ def main():
             exp = None
         model.fit(x_train, y_train)
         print(labels[i])
-        # y_pred = model.predict(x_train)
-        # print_metrics(y_train, y_pred, "Train dataset", exp)
+        y_pred = model.predict(x_train)
+        print_metrics(y_train, y_pred, "Train dataset", exp)
         y_pred = model.predict(x_test)
         print_metrics(y_test, y_pred, "Test dataset", exp)
         results.append(accuracy_score(y_test, y_pred))
